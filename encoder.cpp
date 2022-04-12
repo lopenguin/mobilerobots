@@ -3,7 +3,7 @@ Implements encoder.h
 */
 #include "encoder.h"
 
-#include <pigpio.h>
+#include <pigpio>
 #include <iostream>
 #include <thread>
 #include <chrono>
