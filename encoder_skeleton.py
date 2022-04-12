@@ -29,8 +29,8 @@ class Encoder:
         # down.  Set up all channels this way:
         for channel in [chLA, chLB, chRA, chRB]:
             print("Setting up input GPIO%2d with pull-up..." % channel)
-            self.io.set_mode(channel, pigpio.INPUT) 
-            self.io.set_pull_up_down(channel, pigpio.PUD_UP) 
+            self.io.set_mode(channel, pigpio.INPUT)
+            self.io.set_pull_up_down(channel, pigpio.PUD_UP)
 
         # Prepare/initialize the channel states.
         self.LA = self.io.read(chLA)
@@ -82,14 +82,35 @@ class Encoder:
         self.LA = True
 
     def LAfall(self, gpio, level, tick):
+        # Update
+        if (self.LB):
+            self.lcount += 1
+        else:
+            self.lcount -= 1
+        # Save the new state
+        self.LA = False
 
     def LBrise(self, gpio, level, tick):
+        # Update
+        if (self.LA):
+            self.lcount += 1
+        else:
+            self.lcount -= 1
+        # Save the new state
+        self.LB = True
 
     def LBfall(self, gpio, level, tick):
+        # Update
+        if (not self.LA):
+            self.lcount += 1
+        else:
+            self.lcount -= 1
+        # Save the new state
+        self.LB = False
 
     ....
 
-              
+
 #
 #   Main
 #
