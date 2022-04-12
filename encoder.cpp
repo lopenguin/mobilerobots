@@ -22,8 +22,8 @@ Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) :
 
     // set the encoder pins as inputs with pull-up
     for (int i{0}; i < 4; ++i) {
-        gpioSetMode(pins[i], PI_INPUT);
-        gpioSetPullUpDown(pins[i], PI_PUD_UP);
+        gpioSetMode(m_pins[i], PI_INPUT);
+        gpioSetPullUpDown(m_pins[i], PI_PUD_UP);
     }
 
     // initalize readings
@@ -51,7 +51,7 @@ void Encoder::shutdown() {
     gpioTerminate();
 }
 
-static void Encoder::LAchange(int gpio, int level, uint32_t tick, void *enc) {
+void Encoder::LAchange(int gpio, int level, uint32_t tick, void *enc) {
     Encoder* encObj = static_cast<*Encoder>(enc);
     if (level == 0) {
         // LA FALLING
@@ -73,7 +73,7 @@ static void Encoder::LAchange(int gpio, int level, uint32_t tick, void *enc) {
     }
 }
 
-static void Encoder::LBchange(int gpio, int level, uint32_t tick, void *enc) {
+void Encoder::LBchange(int gpio, int level, uint32_t tick, void *enc) {
     if (level == 0) {
         // LB FALLING
         if (!enc->m_lastLA)
@@ -94,7 +94,7 @@ static void Encoder::LBchange(int gpio, int level, uint32_t tick, void *enc) {
     }
 }
 
-static void Encoder::RAchange(int gpio, int level, uint32_t tick, void *enc) {
+void Encoder::RAchange(int gpio, int level, uint32_t tick, void *enc) {
     if (level == 0) {
         // RA FALLING
         if (enc->m_lastRB)
@@ -115,7 +115,7 @@ static void Encoder::RAchange(int gpio, int level, uint32_t tick, void *enc) {
     }
 }
 
-static void Encoder::RBchange(int gpio, int level, uint32_t tick, void *enc) {
+void Encoder::RBchange(int gpio, int level, uint32_t tick, void *enc) {
     if (level == 0) {
         // RB FALLING
         if (!enc->m_lastRA)
