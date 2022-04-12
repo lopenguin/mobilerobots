@@ -4,7 +4,7 @@ Implements encoder.h
 #include "encoder.h"
 
 #include <pigpio.h>
-#include <iostream.h>
+#include <iostream>
 #include <thread.h>
 #include <chrono.h>
 #include <signal.h>
