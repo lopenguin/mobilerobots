@@ -52,6 +52,7 @@ void Encoder::shutdown() {
 }
 
 static void Encoder::LAchange(int gpio, int level, uint32_t tick, void *enc) {
+    Encoder* encObj = static_cast<*Encoder>(enc);
     if (level == 0) {
         // LA FALLING
         if (enc->m_lastLB)
