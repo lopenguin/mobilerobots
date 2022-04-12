@@ -76,7 +76,7 @@ uint8_t SCMD::begin( void )
 	uint8_t dataToWrite = 0;  //Temporary variable
 
 	m_fd = wiringPiI2CSetup(settings.I2CAddress);
-	std::cout << "Init result: "<< fd << '\n';
+	std::cout << "Init result: "<< m_fd << '\n';
 
 	//dummy read
 	readRegister(SCMD_ID);

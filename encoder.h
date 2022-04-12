@@ -5,7 +5,7 @@ C++ Port of the encoder reader library.
 #define ATLAS_ENCODER_H
 
 #include <pigpio.h>
-#include <iostream.h>
+#include <iostream>
 #include <time.h>
 
 // Encoder class

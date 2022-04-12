@@ -5,9 +5,9 @@ Implements encoder.h
 
 #include <pigpio.h>
 #include <iostream>
-#include <thread.h>
-#include <chrono.h>
-#include <signal.h>
+#include <thread>
+#include <chrono>
+#include <csignal>
 
 /**** Encoder Class Implementation ****/
 Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) {
