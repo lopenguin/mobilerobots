@@ -73,7 +73,8 @@ void Encoder::LAchange(int gpio, int level, uint32_t tick, void *encObj) {
     }
 }
 
-void Encoder::LBchange(int gpio, int level, uint32_t tick, void *enc) {
+void Encoder::LBchange(int gpio, int level, uint32_t tick, void *encObj) {
+    Encoder* enc = static_cast<Encoder*>(encObj);
     if (level == 0) {
         // LB FALLING
         if (!enc->m_lastLA)
@@ -94,7 +95,8 @@ void Encoder::LBchange(int gpio, int level, uint32_t tick, void *enc) {
     }
 }
 
-void Encoder::RAchange(int gpio, int level, uint32_t tick, void *enc) {
+void Encoder::RAchange(int gpio, int level, uint32_t tick, void *encObj) {
+    Encoder* enc = static_cast<Encoder*>(encObj);
     if (level == 0) {
         // RA FALLING
         if (enc->m_lastRB)
@@ -115,7 +117,8 @@ void Encoder::RAchange(int gpio, int level, uint32_t tick, void *enc) {
     }
 }
 
-void Encoder::RBchange(int gpio, int level, uint32_t tick, void *enc) {
+void Encoder::RBchange(int gpio, int level, uint32_t tick, void *encObj) {
+    Encoder* enc = static_cast<Encoder*>(encObj);
     if (level == 0) {
         // RB FALLING
         if (!enc->m_lastRA)
@@ -137,12 +140,12 @@ void Encoder::RBchange(int gpio, int level, uint32_t tick, void *enc) {
 }
 
 volatile bool out{0};
-void exit(int sig) {
+void ctrlc(int sig) {
     out = 1;
 }
 
 int main(int argc, char *argv[]) {
-    signal(SIGINT, exit);
+    signal(SIGINT, ctrlc);
 
     // Create an encoder object
     Encoder enc = Encoder();
