@@ -20,7 +20,7 @@ Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) {
     std::cout << "Connected to pigpio daemon.";
 
     // set the encoder pins as inputs with pull-up
-    int pins[4] = [LApin, LBpin, RApin, RBpin];
+    int pins[4] = {LApin, LBpin, RApin, RBpin};
     for (int i{0}; i < 4; ++i) {
         gpioSetMode(pins[i], PI_INPUT);
         gpioSetPullUpDown(pins[i], PI_PUD_UP);
@@ -33,106 +33,106 @@ Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) {
     m_lastRB = gpioRead(RBpin);
 
     // prepare callbacks
-    gpioSetAlertFunc(LApin, Encoder::LAchange);
-    gpioSetAlertFunc(LBpin, Encoder::LBchange);
-    gpioSetAlertFunc(RApin, Encoder::RAchange);
-    gpioSetAlertFunc(RBpin, Encoder::RBchange);
+    gpioSetAlertFuncEx(LApin, Encoder::LAchange, this);
+    gpioSetAlertFuncEx(LBpin, Encoder::LBchange, this);
+    gpioSetAlertFuncEx(RApin, Encoder::RAchange, this);
+    gpioSetAlertFuncEx(RBpin, Encoder::RBchange, this);
 }
 
 void Encoder::shutdown() {
     // cancel callback functions
     std::cout << "Cancelling encoder callbacks...";
-    gpioSetAlertFunc(LApin, null);
-    gpioSetAlertFunc(LBpin, null);
-    gpioSetAlertFunc(RApin, null);
-    gpioSetAlertFunc(RBpin, null);
+    gpioSetAlertFunc(LApin, NULL);
+    gpioSetAlertFunc(LBpin, NULL);
+    gpioSetAlertFunc(RApin, NULL);
+    gpioSetAlertFunc(RBpin, NULL);
 
     // wait til everything is done before stopping I/O
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
     gpioTerminate();
 }
 
-void Encoder::LAchange(int gpio, int level, uint32_t tick) {
+static void Encoder::LAchange(int gpio, int level, uint32_t tick, void *enc) {
     if (level == 0) {
         // LA FALLING
-        if (m_lastLB)
-            ++m_lcount;
-        else:
-            --m_lcount;
+        if (enc->m_lastLB)
+            ++enc->m_lcount;
+        else
+            --enc->m_lcount;
 
-        m_lastLA = false;
+        enc->m_lastLA = false;
 
     } else if (level == 1) {
         // LA RISING
-        if (!m_lastLB)
-            ++m_lcount;
-        else:
-            --m_lcount;
+        if (!enc->m_lastLB)
+            ++enc->m_lcount;
+        else
+            --enc->m_lcount;
 
-        m_lastLA = true;
+        enc->m_lastLA = true;
     }
 }
 
-void Encoder::LBchange(int gpio, int level, uint32_t tick) {
+static void Encoder::LBchange(int gpio, int level, uint32_t tick, void *enc) {
     if (level == 0) {
         // LB FALLING
-        if (!m_lastLA)
-            ++m_lcount;
-        else:
-            --m_lcount;
+        if (!enc->m_lastLA)
+            ++enc->m_lcount;
+        else
+            --enc->m_lcount;
 
-        m_lastLB = false;
+        enc->m_lastLB = false;
 
     } else if (level == 1) {
         // LB RISING
-        if (m_lastLA)
-            ++m_lcount;
-        else:
-            --m_lcount;
+        if (enc->m_lastLA)
+            ++enc->m_lcount;
+        else
+            --enc->m_lcount;
 
-        m_lastLB = true;
+        enc->m_lastLB = true;
     }
 }
 
-void Encoder::RAchange(int gpio, int level, uint32_t tick) {
+static void Encoder::RAchange(int gpio, int level, uint32_t tick, void *enc) {
     if (level == 0) {
         // RA FALLING
-        if (m_lastRB)
-            ++m_rcount;
-        else:
-            --m_rcount;
+        if (enc->m_lastRB)
+            ++enc->m_rcount;
+        else
+            --enc->m_rcount;
 
-        m_lastRA = false;
+        enc->m_lastRA = false;
 
     } else if (level == 1) {
         // RA RISING
-        if (!m_lastRB)
-            ++m_rcount;
-        else:
-            --m_rcount;
+        if (!enc->m_lastRB)
+            ++enc->m_rcount;
+        else
+            --enc->m_rcount;
 
-        m_lastRA = true;
+        enc->m_lastRA = true;
     }
 }
 
-void Encoder::LBchange(int gpio, int level, uint32_t tick) {
+static void Encoder::RBchange(int gpio, int level, uint32_t tick, void *enc) {
     if (level == 0) {
         // RB FALLING
-        if (!m_lastRA)
-            ++m_rcount;
-        else:
-            --m_rcount;
+        if (!enc->m_lastRA)
+            ++enc->m_rcount;
+        else
+            --enc->m_rcount;
 
-        m_lastRB = false;
+        enc->m_lastRB = false;
 
     } else if (level == 1) {
         // RB RISING
-        if (m_lastRA)
-            ++m_rcount;
-        else:
-            --m_rcount;
+        if (enc->m_lastRA)
+            ++enc->m_rcount;
+        else
+            --enc->m_rcount;
 
-        m_lastRB = true;
+        enc->m_lastRB = true;
     }
 }
 
@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Running...";
 
     while (1) {
-        printf("Encoders: Left %d, Right %d", enc.getLeftCount(), enc.getRightCount())
+        printf("Encoders: Left %d, Right %d", enc.getLeftCount(), enc.getRightCount());
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
         if (out) {
             break;
@@ -159,4 +159,6 @@ int main(int argc, char *argv[]) {
 
     // cleanup
     enc.shutdown();
+
+    return 1;
 }

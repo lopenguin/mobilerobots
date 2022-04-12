@@ -20,10 +20,10 @@ public:
     int getRightCount() { return m_rcount; }
 
 private:
-    void LAchange(int gpio, int level, uint32_t tick);
-    void LBchange(int gpio, int level, uint32_t tick);
-    void RAchange(int gpio, int level, uint32_t tick);
-    void RBchange(int gpio, int level, uint32_t tick);
+    static void LAchange(int gpio, int level, uint32_t tick, void *enc);
+    static void LBchange(int gpio, int level, uint32_t tick, void *enc);
+    static void RAchange(int gpio, int level, uint32_t tick, void *enc);
+    static void RBchange(int gpio, int level, uint32_t tick, void *enc);
 
     bool m_lastLA{};
     bool m_lastLB{};
