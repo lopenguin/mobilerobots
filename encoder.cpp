@@ -13,12 +13,12 @@ Implements encoder.h
 Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) :
                         m_pins{LApin, LBpin, RApin, RBpin}  {
     // Initialize pigpio daemon connection
-    if (gpioInitialise() < 0) {
-        // failed
-        std::cout << "Unable to connect to pigpio daemon! Pausing...";
-        while (1) {};
-    }
-    std::cout << "Connected to pigpio daemon.";
+    // if (gpioInitialise() < 0) {
+    //     // failed
+    //     std::cout << "Unable to connect to pigpio daemon! Pausing...";
+    //     while (1) {};
+    // }
+    // std::cout << "Connected to pigpio daemon.";
 
     // set the encoder pins as inputs with pull-up
     for (int i{0}; i < 4; ++i) {
