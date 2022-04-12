@@ -10,7 +10,8 @@ Implements encoder.h
 #include <csignal>
 
 /**** Encoder Class Implementation ****/
-Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) {
+Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) :
+                        m_pins{LApin, LBpin, RApin, RBpin}  {
     // Initialize pigpio daemon connection
     if (gpioInitialise() < 0) {
         // failed
@@ -20,7 +21,6 @@ Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) {
     std::cout << "Connected to pigpio daemon.";
 
     // set the encoder pins as inputs with pull-up
-    int pins[4] = {LApin, LBpin, RApin, RBpin};
     for (int i{0}; i < 4; ++i) {
         gpioSetMode(pins[i], PI_INPUT);
         gpioSetPullUpDown(pins[i], PI_PUD_UP);
@@ -42,10 +42,9 @@ Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) {
 void Encoder::shutdown() {
     // cancel callback functions
     std::cout << "Cancelling encoder callbacks...";
-    gpioSetAlertFunc(LApin, NULL);
-    gpioSetAlertFunc(LBpin, NULL);
-    gpioSetAlertFunc(RApin, NULL);
-    gpioSetAlertFunc(RBpin, NULL);
+    for (int i{0}; i < 4; ++i) {
+        gpioSetAlertFunc(m_pins[i], NULL);
+    }
 
     // wait til everything is done before stopping I/O
     std::this_thread::sleep_for(std::chrono::milliseconds(250));

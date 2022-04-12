@@ -32,6 +32,8 @@ private:
 
     int m_lcount{};
     int m_rcount{};
+
+    int m_pins[4]{};
 };
 
 #endif
