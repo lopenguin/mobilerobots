@@ -17,7 +17,7 @@ import time
 #
 class Encoder:
     # Initialize.
-    def __init__(self, chLA = 23, chLB = 25, chRA = 24, chRB = 22):
+    def __init__(self, chLA = 24, chLB = 25, chRA = 23, chRB = 22):
         # Initialize the connection to the pigpio daemon.
         self.io = pigpio.pi()
         if not self.io.connected:
