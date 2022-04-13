@@ -144,8 +144,6 @@ class Encoder:
         # Save the new state
         self.RB = False
 
-    ....
-
 
 #
 #   Main
