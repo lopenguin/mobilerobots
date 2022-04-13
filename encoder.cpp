@@ -19,7 +19,7 @@ Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) :
         std::cout << "Unable to connect to pigpio daemon! Pausing...";
         while (1) {};
     }
-    std::cout << "Connected to pigpio daemon.";
+    std::cout << "Connected to pigpio daemon." << '\n';
 
     // set the encoder pins as inputs with pull-up
     for (int i{0}; i < 4; ++i) {
@@ -37,7 +37,7 @@ Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) :
     m_cbids[0] = callback_ex(m_pi, LApin, EITHER_EDGE, Encoder::LAchange, this);
     m_cbids[1] = callback_ex(m_pi, LBpin, EITHER_EDGE, Encoder::LBchange, this);
     m_cbids[2] = callback_ex(m_pi, RApin, EITHER_EDGE, Encoder::RAchange, this);
-    m_cbids[3] = callback_ex(m_pi, RBpin, EITHER_EDGE, Encoder::RBchange, this);
+    m_cbids[3] = callback_ex(m_pi, RBpin, FALLING_EDGE, Encoder::RBchange, this);
 }
 
 void Encoder::shutdown() {
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
     // Create an encoder object
     Encoder enc = Encoder();
 
-    std::cout << "Running...";
+    std::cout << "Running..." << '\n';
 
     while (1) {
         printf("Encoders: Left %d, Right %d\n", enc.getLeftCount(), enc.getRightCount());
