@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Running...";
 
     while (1) {
-        printf("Encoders: Left %d, Right %d", enc.getLeftCount(), enc.getRightCount());
+        printf("Encoders: Left %d, Right %d\n", enc.getLeftCount(), enc.getRightCount());
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
         if (out) {
             break;
