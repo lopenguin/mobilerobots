@@ -108,6 +108,42 @@ class Encoder:
         # Save the new state
         self.LB = False
 
+    def RArise(self, gpio, level, tick):
+        # Update
+        if (not self.RB):
+            self.lcount += 1
+        else:
+            self.lcount -= 1
+        # Save the new state
+        self.RA = True
+
+    def RAfall(self, gpio, level, tick):
+        # Update
+        if (self.RB):
+            self.lcount += 1
+        else:
+            self.lcount -= 1
+        # Save the new state
+        self.RA = False
+
+    def RBrise(self, gpio, level, tick):
+        # Update
+        if (self.RA):
+            self.lcount += 1
+        else:
+            self.lcount -= 1
+        # Save the new state
+        self.RB = True
+
+    def RBfall(self, gpio, level, tick):
+        # Update
+        if (not self.RA):
+            self.lcount += 1
+        else:
+            self.lcount -= 1
+        # Save the new state
+        self.RB = False
+
     ....
 
 
