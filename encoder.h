@@ -23,10 +23,10 @@ private:
     int m_pi{};
     int m_cbids[4]{};
 
-    static void LAchange(int pi, int gpio, int level, uint32_t tick, void *enc);
-    static void LBchange(int pi, int gpio, int level, uint32_t tick, void *enc);
-    static void RAchange(int pi, int gpio, int level, uint32_t tick, void *enc);
-    static void RBchange(int pi, int gpio, int level, uint32_t tick, void *enc);
+    static void LAchange(int pi, unsigned int gpio, unsigned int level, uint32_t tick, void *enc);
+    static void LBchange(int pi, unsigned int gpio, unsigned int level, uint32_t tick, void *enc);
+    static void RAchange(int pi, unsigned int gpio, unsigned int level, uint32_t tick, void *enc);
+    static void RBchange(int pi, unsigned int gpio, unsigned int level, uint32_t tick, void *enc);
 
     bool m_lastLA{};
     bool m_lastLB{};

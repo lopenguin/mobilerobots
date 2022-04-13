@@ -52,7 +52,7 @@ void Encoder::shutdown() {
     pigpio_stop(m_pi);
 }
 
-void Encoder::LAchange(int pi, int gpio, int level, uint32_t tick, void *encObj) {
+void Encoder::LAchange(int pi, unsigned int gpio, unsigned int level, uint32_t tick, void *encObj) {
     Encoder* enc = static_cast<Encoder*>(encObj);
     if (level == 0) {
         // LA FALLING
@@ -74,7 +74,7 @@ void Encoder::LAchange(int pi, int gpio, int level, uint32_t tick, void *encObj)
     }
 }
 
-void Encoder::LBchange(int pi, int gpio, int level, uint32_t tick, void *encObj) {
+void Encoder::LBchange(int pi, unsigned int gpio, unsigned int level, uint32_t tick, void *encObj) {
     Encoder* enc = static_cast<Encoder*>(encObj);
     if (level == 0) {
         // LB FALLING
@@ -96,7 +96,7 @@ void Encoder::LBchange(int pi, int gpio, int level, uint32_t tick, void *encObj)
     }
 }
 
-void Encoder::RAchange(int pi, int gpio, int level, uint32_t tick, void *encObj) {
+void Encoder::RAchange(int pi, unsigned int gpio, unsigned int level, uint32_t tick, void *encObj) {
     Encoder* enc = static_cast<Encoder*>(encObj);
     if (level == 0) {
         // RA FALLING
@@ -118,7 +118,7 @@ void Encoder::RAchange(int pi, int gpio, int level, uint32_t tick, void *encObj)
     }
 }
 
-void Encoder::RBchange(int pi, int gpio, int level, uint32_t tick, void *encObj) {
+void Encoder::RBchange(int pi, unsigned int gpio, unsigned int level, uint32_t tick, void *encObj) {
     Encoder* enc = static_cast<Encoder*>(encObj);
     if (level == 0) {
         // RB FALLING
