@@ -11,7 +11,7 @@ C++ Port of the encoder reader library.
 // Encoder class
 class Encoder {
 public:
-    Encoder(int LApin = 23, int LBpin = 25, int RApin = 24, int RBpin = 22);
+    Encoder(int LApin = 22, int LBpin = 24, int RApin = 25, int RBpin = 23);
 
     void shutdown();
 
