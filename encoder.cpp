@@ -119,22 +119,23 @@ void Encoder::RAchange(int pi, unsigned int gpio, unsigned int level, uint32_t t
 }
 
 void Encoder::RBchange(int pi, unsigned int gpio, unsigned int level, uint32_t tick, void *encObj) {
+    std::cout << "RBchange";
     Encoder* enc = static_cast<Encoder*>(encObj);
     if (level == 0) {
         // RB FALLING
         if (!enc->m_lastRA)
-            ++enc->m_rcount;
+            ++(enc->m_rcount);
         else
-            --enc->m_rcount;
+            --(enc->m_rcount);
 
         enc->m_lastRB = false;
 
     } else if (level == 1) {
         // RB RISING
         if (enc->m_lastRA)
-            ++enc->m_rcount;
+            ++(enc->m_rcount);
         else
-            --enc->m_rcount;
+            --(enc->m_rcount);
 
         enc->m_lastRB = true;
     }
