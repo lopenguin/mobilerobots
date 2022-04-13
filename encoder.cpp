@@ -13,7 +13,7 @@ Implements encoder.h
 Encoder::Encoder(int LApin, int LBpin, int RApin, int RBpin) :
                         m_pins{LApin, LBpin, RApin, RBpin}  {
     // Initialize pigpio daemon connection
-    int m_pi = pigpio_start();
+    int m_pi = pigpio_start(NULL, NULL);
     if (m_pi < 0) {
         // failed
         std::cout << "Unable to connect to pigpio daemon! Pausing...";
@@ -49,7 +49,7 @@ void Encoder::shutdown() {
 
     // wait til everything is done before stopping I/O
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    pigpio_stop();
+    pigpio_stop(m_pi);
 }
 
 void Encoder::LAchange(int gpio, int level, uint32_t tick, void *encObj) {
