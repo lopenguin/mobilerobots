@@ -20,6 +20,9 @@ public:
     int getRightCount() { return m_rcount; }
 
 private:
+    int m_pi{};
+    int m_cbids[4]{};
+
     static void LAchange(int gpio, int level, uint32_t tick, void *enc);
     static void LBchange(int gpio, int level, uint32_t tick, void *enc);
     static void RAchange(int gpio, int level, uint32_t tick, void *enc);
