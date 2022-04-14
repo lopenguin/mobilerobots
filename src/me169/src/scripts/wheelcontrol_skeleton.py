@@ -103,8 +103,8 @@ if __name__ == "__main__":
     rospy.init_node('wheelcontrol')
 
     # Inititlize the low level.
-    encoder = Encoder(chLA, chLB, chRA, chRB)
-    driver  = Driver(chL, chR, reserveL, reverseR)
+    encoder = Encoder()
+    driver  = Driver()
 
     # Create a publisher to send the wheel desired and actual (state).
     pubdes = rospy.Publisher('/wheel_desired', JointState, queue_size=10)
