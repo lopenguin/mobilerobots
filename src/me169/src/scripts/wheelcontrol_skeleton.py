@@ -29,7 +29,7 @@ from sensor_msgs.msg import JointState
 
 ## CONSTANTS
 ENC_TO_RAD = 16 * 45 * 2 * math.pi
-VEL_TIME_CONST =  11
+VEL_TIME_CONST =  24
 
 #
 #   Command Callback Function
