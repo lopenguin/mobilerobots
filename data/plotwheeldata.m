@@ -49,18 +49,18 @@ clf;
 % Plot.
 ax(1) = subplot(2,1,1);
 hold on;
-if ~isempty(pc), plot(tc,pc,'bo--','LineWidth',2,'DisplayName','Command'); end
-if ~isempty(pd), plot(td,pd,'ro:', 'LineWidth',2,'DisplayName','Desired'); end
-if ~isempty(pa), plot(ta,pa,'gx-', 'LineWidth',2,'DisplayName','Actual');  end
+if ~isempty(pc), plot(tc,pc,'--','LineWidth',2,'DisplayName','Command'); end
+if ~isempty(pd), plot(td,pd,':', 'LineWidth',2,'DisplayName','Desired'); end
+if ~isempty(pa), plot(ta,pa,'-', 'LineWidth',2,'DisplayName','Actual');  end
 grid on;
 ylabel('Position (rad)');
 title(['Data for ' joint]);
 legend;
 
 ax(2) = subplot(2,1,2);
-if ~isempty(vc), plot(tc,vc,'bo--','LineWidth',2,'DisplayName','Command'); end
-if ~isempty(vd), plot(td,vd,'ro:', 'LineWidth',2,'DisplayName','Desired'); end
-if ~isempty(va), plot(ta,va,'gx-', 'LineWidth',2,'DisplayName','Actual');  end
+if ~isempty(vc), plot(tc,vc,'--','LineWidth',2,'DisplayName','Command'); end
+if ~isempty(vd), plot(td,vd,':', 'LineWidth',2,'DisplayName','Desired'); end
+if ~isempty(va), plot(ta,va,'-', 'LineWidth',2,'DisplayName','Actual');  end
 grid on;
 ylabel('Velocity (rad/sec)');
 xlabel('Time (sec)');
