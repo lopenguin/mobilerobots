@@ -18,13 +18,13 @@ import time
 #
 class Driver:
     # Initialize.
-    def __init__(self, chL = 0, chR = 1, reverseL = 0, reverseR = 0):
+    def __init__(self, chL = 0, chR = 1, reverseL = 1, reverseR = 1):
         # Pick/save the parameters.
         self.chL  = chL
         self.chR  = chR
         self.revL = reverseL
         self.revR = reverseR
-    
+
         # Initialize a connection to the motor driver.
         self.driver = qwiic_scmd.QwiicScmd()
         if not self.driver.connected:
@@ -67,8 +67,8 @@ if __name__ == "__main__":
 
     # Try a sinple move.
     print('Test driving forward...');
-    driver.left(110)
-    driver.right(-110)
+    driver.left(150)
+    driver.right(-150)
     time.sleep(1.0)
 
     print('Test spinning right (negative Z)...');
