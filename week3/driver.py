@@ -18,7 +18,7 @@ import time
 #
 class Driver:
     # Initialize.
-    def __init__(self, chL = 0, chR = 1, reverseL = 1, reverseR = 1):
+    def __init__(self, chL = 1, chR = 0, reverseL = 0, reverseR = 0):
         # Pick/save the parameters.
         self.chL  = chL
         self.chR  = chR
