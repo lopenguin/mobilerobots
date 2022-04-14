@@ -36,7 +36,7 @@ from sensor_msgs.msg import JointState
 #
 def callback_command(msg):
     # Check the message?
-    
+
     # Note the current time (to timeout the command).
     now = rospy.Time.now()
 
@@ -99,7 +99,8 @@ if __name__ == "__main__":
     sub = rospy.Subscriber("/wheel_command", JointState, callback_command)
 
     # Create the timer.
-    duration = rospy.Duration(DT);
+    rate = 100
+    duration = rospy.Duration(1.0/rate);  # check!
     dt       = duration.to_sec()
     timer    = rospy.Timer(duration, callback_timer)
 

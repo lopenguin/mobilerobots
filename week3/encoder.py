@@ -66,9 +66,9 @@ class Encoder:
 
 
     # Report
-    def leftencoder(self):
+    def getLeft(self):
         return (self.lcount)
-    def rightencoder(self):
+    def getRight(self):
         return (self.rcount)
 
     # Callback Functions:
