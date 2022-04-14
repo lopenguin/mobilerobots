@@ -22,8 +22,8 @@ import sys
 import time
 import rospy
 
-import Encoder
-import Driver
+from encoder import Encoder
+from driver import Driver
 
 from sensor_msgs.msg import JointState
 
