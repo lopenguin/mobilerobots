@@ -27,9 +27,13 @@ import driver
 
 from sensor_msgs.msg import JointState
 
-# CONSTANTS
+## CONSTANTS
 ENC_TO_RAD = 16 * 45 * 2 * math.pi
 
+## Global Variables
+last_theta_L = 0
+last_theta_R = 0
+last_time = 0
 
 #
 #   Command Callback Function
@@ -42,9 +46,9 @@ def callback_command(msg):
     # Note the current time (to timeout the command).
     now = rospy.Time.now()
 
-    # Save...
-    cmdvel[]  =
-    cmdtime[] =
+    # # Save...
+    # cmdvel[]  =
+    # cmdtime[] =
 
 
 #
@@ -53,15 +57,19 @@ def callback_command(msg):
 def callback_timer(event):
     # Note the current time to compute dt and populate the ROS messages.
     now = rospy.Time.now()
+    dt = now - last_time
+    last_time = now
 
     # Process the commands.
 
-    # Process the encoders, convert to wheel angles!
+    ## Process the encoders, convert to wheel angles!
+    # Get encoder readings
     theta_L = encoder.getLeft()/ENC_TO_RAD
     theta_R = encoder.getRight()/ENC_TO_RAD
 
-
-
+    # Get derivatives
+    thetadot_L = (theta_L - last_theta_L) / dt
+    thetadot_R = (theta_R - last_theta_R) / dt
 
     # Add feedback?
 
@@ -72,19 +80,19 @@ def callback_timer(event):
     msg = JointState()
     msg.header.stamp = now
     msg.name         = ['leftwheel', 'rightwheel']
-    msg.position     = [FIRST, SECOND]
-    msg.velocity     = [FIRST, SECOND]
+    msg.position     = [theta_L, theta_R]
+    msg.velocity     = [thetadot_L, thetadot_R]
     msg.effort       = [0.0, 0.0]
     pubact.publish(msg)
 
     # Publish the desired wheel state
-    msg = JointState()
-    msg.header.stamp = rospy.Time.now()
-    msg.name         = ['leftwheel', 'rightwheel']
-    msg.position     = [FIRST, SECOND]
-    msg.velocity     = [FIRST, SECOND]
-    msg.effort       = [PWM1, PWM2]
-    pubdes.publish(msg)
+    # msg = JointState()
+    # msg.header.stamp = rospy.Time.now()
+    # msg.name         = ['leftwheel', 'rightwheel']
+    # msg.position     = [FIRST, SECOND]
+    # msg.velocity     = [FIRST, SECOND]
+    # msg.effort       = [PWM1, PWM2]
+    # pubdes.publish(msg)
 
 
 #
