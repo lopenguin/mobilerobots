@@ -29,6 +29,7 @@ from sensor_msgs.msg import JointState
 
 ## CONSTANTS
 ENC_TO_RAD = 16 * 45 * 2 * math.pi
+VEL_TIME_CONST = 33
 
 #
 #   Command Callback Function
@@ -53,7 +54,9 @@ def callback_timer(event):
     # Setup
     global last_time
     global last_theta_L
+    global last_thetadot_L
     global last_theta_R
+    global last_thetadot_R
 
     # Note the current time to compute dt and populate the ROS messages.
     now = rospy.Time.now()
@@ -71,10 +74,15 @@ def callback_timer(event):
     thetadot_L = (theta_L - last_theta_L) / dt
     thetadot_R = (theta_R - last_theta_R) / dt
 
-    last_theta_L = theta_L
-    last_theta_R = theta_R
+    # Filter derivatives
+    thetadot_L = last_thetadot_L + VEL_TIME_CONST*dt*(thetadot_L - last_thetadot_L)
+    thetadot_R = last_thetadot_R + VEL_TIME_CONST*dt*(thetadot_R - last_thetadot_R)
 
-    # Add feedback?
+    # update last values
+    last_theta_L = theta_L
+    last_thetadot_L = thetadot_L
+    last_theta_R = theta_R
+    last_thetadot_R = thetadot_R
 
     # Generate motor commands (convert wheel speed to PWM)
     # Send wheel commands.
@@ -104,9 +112,10 @@ def callback_timer(event):
 if __name__ == "__main__":
     # Global variables
     last_theta_L = 0
+    last_thetadot_L = 0
     last_theta_R = 0
+    last_thetadot_R = 0
     last_time = 0
-
 
     # Initialize the ROS node.
     rospy.init_node('wheelcontrol')
