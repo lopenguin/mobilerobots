@@ -50,10 +50,15 @@ def callback_command(msg):
 #   Timer Callback Function
 #
 def callback_timer(event):
+    # Setup
+    global last_time
+    global last_theta_L
+    global last_theta_R
+
     # Note the current time to compute dt and populate the ROS messages.
     now = rospy.Time.now()
-    dt = now - last_time
-    last_time = now
+    dt = now.to_sec() - last_time
+    last_time = now.to_sec()
 
     # Process the commands.
 
@@ -65,6 +70,9 @@ def callback_timer(event):
     # Get derivatives
     thetadot_L = (theta_L - last_theta_L) / dt
     thetadot_R = (theta_R - last_theta_R) / dt
+
+    last_theta_L = theta_L
+    last_theta_R = theta_R
 
     # Add feedback?
 
