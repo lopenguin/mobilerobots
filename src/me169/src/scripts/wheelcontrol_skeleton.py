@@ -30,11 +30,6 @@ from sensor_msgs.msg import JointState
 ## CONSTANTS
 ENC_TO_RAD = 16 * 45 * 2 * math.pi
 
-## Global Variables
-last_theta_L = 0
-last_theta_R = 0
-last_time = 0
-
 #
 #   Command Callback Function
 #
@@ -99,6 +94,12 @@ def callback_timer(event):
 #   Main Code
 #
 if __name__ == "__main__":
+    # Global variables
+    last_theta_L = 0
+    last_theta_R = 0
+    last_time = 0
+
+
     # Initialize the ROS node.
     rospy.init_node('wheelcontrol')
 
