@@ -1,0 +1,2 @@
+
+-DCATKIN_DEVEL_PREFIX=/home/atlas/robotws/devel -DCMAKE_INSTALL_PREFIX=/home/atlas/robotws/install -G Unix Makefiles
