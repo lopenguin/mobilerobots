@@ -73,7 +73,6 @@ class Encoder:
 
     # Callback Functions:
     def LArise(self, gpio, level, tick):
-        print("LArise");
         # Update
         if (not self.LB):
             self.lcount += 1
@@ -92,7 +91,6 @@ class Encoder:
         self.LA = False
 
     def LBrise(self, gpio, level, tick):
-        print("LBrise");
         # Update
         if (self.LA):
             self.lcount += 1
