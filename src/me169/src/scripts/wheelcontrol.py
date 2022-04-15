@@ -53,11 +53,11 @@ def callback_command(msg):
 def trapezoidPWM(t):
     t = t % 15
     if (t <= 5):
-        return floor(255.0*t/5)
+        return math.floor(255.0*t/5)
     elif (t <= 10):
         return 255
     elif (t <= 15):
-        return floor(255.0*(15-t)/5)
+        return math.floor(255.0*(15-t)/5)
 
 #
 #   Timer Callback Function
