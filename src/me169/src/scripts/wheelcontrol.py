@@ -40,15 +40,24 @@ def callback_command(msg):
     global cmdvel
     global cmdtime
     # Check the message?
-    print(msg)
 
     # Note the current time (to timeout the command).
     now = rospy.Time.now()
 
     # # Save...
-    # cmdvel[]  =
-    # cmdtime[] =
+    cmdvel  = msg.velocity
+    cmdtime = msg.header.stamp
 
+
+# Generates trapezoid in PWM
+def trapezoidPWM(t):
+    t = t % 15
+    if (t <= 5):
+        return floor(255.0*t/5)
+    elif (t <= 10):
+        return 255
+    elif (t <= 15):
+        return floor(255.0*(15-t)/5)
 
 #
 #   Timer Callback Function
@@ -67,6 +76,10 @@ def callback_timer(event):
     last_time = now.to_sec()
 
     # Process the commands.
+    PWML = trapezoidPWM(now)
+    PWMR = trapezoidPWM(now)
+    driver.left(PWML)
+    driver.right(PWMR)
 
     ## Process the encoders, convert to wheel angles!
     # Get encoder readings
@@ -96,7 +109,7 @@ def callback_timer(event):
     msg.name         = ['leftwheel', 'rightwheel']
     msg.position     = [theta_L, theta_R]
     msg.velocity     = [thetadot_L, thetadot_R]
-    msg.effort       = [0.0, 0.0]
+    msg.effort       = [PWML, PWMR]
     pubact.publish(msg)
 
     # Publish the desired wheel state
