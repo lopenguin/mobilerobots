@@ -31,11 +31,6 @@ from sensor_msgs.msg import JointState
 ENC_TO_RAD = 1.0/(16 * 45) * 2 * math.pi
 VEL_TIME_CONST =  20
 
-PWM_SLOPE_L = 9.03114
-INTERCEPT_L =
-PWM_SLOPE_R = 9.064
-INTERCEPT_R =
-
 #
 #   Command Callback Function
 #
@@ -51,6 +46,19 @@ def callback_command(msg):
     # # Save...
     cmdvel = msg.velocity
     cmdtime = now
+
+
+# Generates trapezoid in PWM
+def trapezoidPWM(t):
+    t = t % 20
+    if (t <= 5):
+        return math.floor(255.0*t/5)
+    elif (t <= 10):
+        return 254
+    elif (t <= 15):
+        return math.floor(255.0*(15-t)/5)
+    elif (t <= 20):
+        return 0
 
 #
 #   Timer Callback Function
@@ -69,12 +77,7 @@ def callback_timer(event):
     last_time = now.to_sec()
 
     ## Process the commands.
-    # only run if command is recent
-    cmdpos = [0, 0]
-    if ((now - cmdtime).to_sec() <= 0.25):
-        # Euler integrate to get cmdpos
-        cmdpos = [cmdvel[0]*dt, cmdvel[1]*dt]
-
+    # ramp up until motion starts
 
     ## Process the encoders, convert to wheel angles!
     # Get encoder readings
@@ -108,13 +111,13 @@ def callback_timer(event):
     pubact.publish(msg)
 
     # Publish the desired wheel state
-    msg = JointState()
-    msg.header.stamp = rospy.Time.now()
-    msg.name         = ['leftwheel', 'rightwheel']
-    msg.position     = cmdpos
-    msg.velocity     = cmdvel
-    msg.effort       = cmdPWM
-    pubdes.publish(msg)
+    # msg = JointState()
+    # msg.header.stamp = rospy.Time.now()
+    # msg.name         = ['leftwheel', 'rightwheel']
+    # msg.position     = [FIRST, SECOND]
+    # msg.velocity     = [FIRST, SECOND]
+    # msg.effort       = [PWM1, PWM2]
+    # pubdes.publish(msg)
 
 
 #
