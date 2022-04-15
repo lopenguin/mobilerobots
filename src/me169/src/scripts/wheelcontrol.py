@@ -37,7 +37,10 @@ VEL_TIME_CONST =  33
 #   Save the command and the time received.
 #
 def callback_command(msg):
+    global cmdvel
+    global cmdtime
     # Check the message?
+    print(msg)
 
     # Note the current time (to timeout the command).
     now = rospy.Time.now()
@@ -116,6 +119,9 @@ if __name__ == "__main__":
     last_theta_R = 0
     last_thetadot_R = 0
     last_time = 0
+
+    cmdvel = []
+    cmdtime = []
 
     # Initialize the ROS node.
     rospy.init_node('wheelcontrol')
