@@ -29,7 +29,7 @@ from sensor_msgs.msg import JointState
 
 ## CONSTANTS
 ENC_TO_RAD = 1.0/(16 * 45) * 2 * math.pi
-VEL_TIME_CONST =  24
+VEL_TIME_CONST =  20
 
 #
 #   Command Callback Function
@@ -75,8 +75,8 @@ def callback_timer(event):
     thetadot_R = (theta_R - last_theta_R) / dt
 
     # Filter derivatives
-#    thetadot_L = last_thetadot_L + VEL_TIME_CONST*dt*(thetadot_L - last_thetadot_L)
-#    thetadot_R = last_thetadot_R + VEL_TIME_CONST*dt*(thetadot_R - last_thetadot_R)
+    thetadot_L = last_thetadot_L + VEL_TIME_CONST*dt*(thetadot_L - last_thetadot_L)
+    thetadot_R = last_thetadot_R + VEL_TIME_CONST*dt*(thetadot_R - last_thetadot_R)
 
     # update last values
     last_theta_L = theta_L
