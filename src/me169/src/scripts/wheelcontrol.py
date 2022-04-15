@@ -48,6 +48,14 @@ def callback_command(msg):
     cmdvel  = msg.velocity
     cmdtime = msg.header.stamp
 
+    cmd_left = cmdvel.leftspeed
+    cmd_right = cmdvel.rightspeed
+
+    driver.left(cmd_left)
+    driver.right(cmd_right)
+
+
+
 
 # Generates trapezoid in PWM
 def trapezoidPWM(t):

@@ -55,7 +55,7 @@ if ~isempty(pa), plot(ta,pa,'-', 'LineWidth',1.5,'DisplayName','Actual');  end
 grid on;
 ylabel('Position (rad)');
 %sgtitle(['Data for ' joint]);
-sgtitle("\lambda = 11");
+sgtitle("\lambda = 33");
 
 legend;
 
