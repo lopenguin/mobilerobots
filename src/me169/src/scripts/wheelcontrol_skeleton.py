@@ -28,8 +28,8 @@ from driver import Driver
 from sensor_msgs.msg import JointState
 
 ## CONSTANTS
-ENC_TO_RAD = 16 * 45 * 2 * math.pi
-VEL_TIME_CONST =  11
+ENC_TO_RAD = 1.0/(16 * 45) * 2 * math.pi
+VEL_TIME_CONST =  20
 
 #
 #   Command Callback Function
@@ -67,8 +67,8 @@ def callback_timer(event):
 
     ## Process the encoders, convert to wheel angles!
     # Get encoder readings
-    theta_L = encoder.getLeft()/ENC_TO_RAD
-    theta_R = encoder.getRight()/ENC_TO_RAD
+    theta_L = encoder.getLeft()*ENC_TO_RAD
+    theta_R = encoder.getRight()*ENC_TO_RAD
 
     # Get derivatives
     thetadot_L = (theta_L - last_theta_L) / dt
