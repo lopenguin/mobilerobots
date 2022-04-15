@@ -59,13 +59,15 @@ def callback_command(msg):
 
 # Generates trapezoid in PWM
 def trapezoidPWM(t):
-    t = t % 15
+    t = t % 20
     if (t <= 5):
         return math.floor(255.0*t/5)
     elif (t <= 10):
-        return 255
+        return 254
     elif (t <= 15):
         return math.floor(255.0*(15-t)/5)
+    elif (t <= 20):
+        return 0
 
 #
 #   Timer Callback Function
@@ -85,7 +87,7 @@ def callback_timer(event):
 
     # Process the commands.
     PWML = trapezoidPWM(now.to_sec())
-    PWMR = trapezoidPWM(now.to_sec())
+    PWMR = -PWML
     driver.left(PWML)
     driver.right(PWMR)
 
