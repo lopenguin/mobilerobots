@@ -77,6 +77,9 @@ def callback_timer(event):
     PWML = slowUpPWM(now.to_sec())
     PWMR = -PWML
 
+    driver.left(PWML)
+    driver.right(PWMR)
+
     ## Process the encoders, convert to wheel angles!
     # Get encoder readings
     theta_L = encoder.getLeft()*ENC_TO_RAD
