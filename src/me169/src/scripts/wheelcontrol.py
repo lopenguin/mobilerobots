@@ -55,7 +55,7 @@ def trapezoidPWM(t):
     if (t <= 5):
         return math.floor(255.0*t/5)
     elif (t <= 10):
-        return 250
+        return 254
     elif (t <= 15):
         return math.floor(255.0*(15-t)/5)
     elif (t <= 20):
