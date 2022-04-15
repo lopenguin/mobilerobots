@@ -89,13 +89,6 @@ preddown = va*rampdown.Coefficients.Estimate(2)+ rampdown.Coefficients.Estimate(
 plot(va,predup,'--');
 plot(va,preddown,'--');
 
-slopeup = rampup.Coefficients.Estimate(2)
-slopedown = rampdown.Coefficients.Estimate(2)
-
-avgslope = (slopeup+slopedown)/2
-
-
-
 
 linkaxes(ax, 'x');
 
