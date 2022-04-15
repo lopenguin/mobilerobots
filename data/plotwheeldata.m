@@ -49,18 +49,20 @@ clf;
 % Plot.
 ax(1) = subplot(2,1,1);
 hold on;
-if ~isempty(pc), plot(tc,pc,'--','LineWidth',2,'DisplayName','Command'); end
-if ~isempty(pd), plot(td,pd,':', 'LineWidth',2,'DisplayName','Desired'); end
-if ~isempty(pa), plot(ta,pa,'-', 'LineWidth',2,'DisplayName','Actual');  end
+if ~isempty(pc), plot(tc,pc,'--','LineWidth',1.5,'DisplayName','Command'); end
+if ~isempty(pd), plot(td,pd,':', 'LineWidth',1.5,'DisplayName','Desired'); end
+if ~isempty(pa), plot(ta,pa,'-', 'LineWidth',1.5,'DisplayName','Actual');  end
 grid on;
 ylabel('Position (rad)');
-title(['Data for ' joint]);
+%sgtitle(['Data for ' joint]);
+sgtitle("\lambda = 11");
+
 legend;
 
 ax(2) = subplot(2,1,2);
-if ~isempty(vc), plot(tc,vc,'--','LineWidth',2,'DisplayName','Command'); end
-if ~isempty(vd), plot(td,vd,':', 'LineWidth',2,'DisplayName','Desired'); end
-if ~isempty(va), plot(ta,va,'-', 'LineWidth',2,'DisplayName','Actual');  end
+if ~isempty(vc), plot(tc,vc,'--','LineWidth',1.5,'DisplayName','Command'); end
+if ~isempty(vd), plot(td,vd,':', 'LineWidth',1.5,'DisplayName','Desired'); end
+if ~isempty(va), plot(ta,va,'-', 'LineWidth',1.5,'DisplayName','Actual');  end
 grid on;
 ylabel('Velocity (rad/sec)');
 xlabel('Time (sec)');
@@ -69,7 +71,7 @@ linkaxes(ax, 'x');
 
 % Name the Figure and span the full 8.5x11 page.
 set(gcf, 'Name',          'Joint Data');
-set(gcf, 'PaperPosition', [0.25 0.25 8.00 10.50]);
+set(gcf, 'PaperPosition', [0.25 0.25 8.00 5]);
 
 % Return to the top subplot, so subsequent title()'s go here...
 subplot(2,1,1);
