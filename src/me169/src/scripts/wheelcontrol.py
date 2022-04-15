@@ -40,19 +40,20 @@ def callback_command(msg):
     global cmdvel
     global cmdtime
     # Check the message?
+    print(msg)
 
     # Note the current time (to timeout the command).
     now = rospy.Time.now()
 
     # # Save...
-    cmdvel  = msg.velocity
-    cmdtime = msg.header.stamp
+    current_cmdvel  = msg.velocity
+    # cmd_left = cmdvel
+    # cmd_right = cmdvel
 
-    cmd_left = cmdvel.leftspeed
-    cmd_right = cmdvel.rightspeed
+    current_cmdtime = msg.header.stamp
 
-    driver.left(cmd_left)
-    driver.right(cmd_right)
+    cmdvel.append(current_cmdvel)
+    cmdtime.append(current_cmdtime)
 
 
 
