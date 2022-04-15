@@ -48,17 +48,13 @@ def callback_command(msg):
     cmdtime = now
 
 
-# Generates trapezoid in PWM
-def trapezoidPWM(t):
-    t = t % 20
+# Generates slow upwards increase in PWM
+def slowUpPWM(t):
+    t = t % 15
     if (t <= 5):
-        return math.floor(255.0*t/5)
-    elif (t <= 10):
-        return 254
-    elif (t <= 15):
-        return math.floor(255.0*(15-t)/5)
-    elif (t <= 20):
         return 0
+    elif (t <= 15):
+        return floor((15 - t) * 255)
 
 #
 #   Timer Callback Function
@@ -78,6 +74,8 @@ def callback_timer(event):
 
     ## Process the commands.
     # ramp up until motion starts
+    PWML = slowUpPWM(now.to_sec())
+    PWMR = -PWML
 
     ## Process the encoders, convert to wheel angles!
     # Get encoder readings
@@ -91,6 +89,12 @@ def callback_timer(event):
     # Filter derivatives
     thetadot_L = last_thetadot_L + VEL_TIME_CONST*dt*(thetadot_L - last_thetadot_L)
     thetadot_R = last_thetadot_R + VEL_TIME_CONST*dt*(thetadot_R - last_thetadot_R)
+
+    # CHECK IF THINGS ARE MOVING
+    if (last_thetadot_L < 0.1 and thetadot_L >= 0.1):
+        print("Left:", PWML)
+    if (last_thetadot_R < 0.1 and thetadot_R >= 0.1):
+        print("Right:",PWMR)
 
     # update last values
     last_theta_L = theta_L
