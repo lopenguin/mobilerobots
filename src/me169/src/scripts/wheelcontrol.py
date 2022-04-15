@@ -28,13 +28,15 @@ from driver import Driver
 from sensor_msgs.msg import JointState
 
 ## CONSTANTS
-ENC_TO_RAD = 1.0/(16 * 45) * 2 * math.pi
-VEL_TIME_CONST =  20
+RATE = 100 # Hz
+ENC_TO_RAD = 1.0/(16 * 45) * 2 * math.pi # rad / enc rev
+VEL_TIME_CONST =  RATE / 5.0 # Hz
+CMD_TIME_CONST = RATE / TODO # Hz
 
-PWM_SLOPE_L = 9.03114
-INTERCEPT_L =
-PWM_SLOPE_R = 9.064
-INTERCEPT_R =
+PWM_SLOPE_L = 9.03114 # PWM / (rad/s)
+START_INCPT_L = TODO # PWM val
+PWM_SLOPE_R = 9.064  # PWM / (rad/s)
+START_INCPT_R = TODO # PWM val
 
 #
 #   Command Callback Function
@@ -48,7 +50,7 @@ def callback_command(msg):
     # Note the current time (to timeout the command).
     now = rospy.Time.now()
 
-    # # Save...
+    ## Save
     cmdvel = msg.velocity
     cmdtime = now
 
@@ -63,40 +65,50 @@ def callback_timer(event):
     global last_theta_R
     global last_thetadot_R
 
+    global lastdesvel
+
     ## Note the current time to compute dt and populate the ROS messages.
     now = rospy.Time.now()
-    dt = now.to_sec() - last_time
-    last_time = now.to_sec()
+    dt = (now - last_time).to_sec()
+    last_time = now
 
     ## Process the commands.
     # only run if command is recent
-    cmdpos = [0, 0]
-    if ((now - cmdtime).to_sec() <= 0.25):
-        # Euler integrate to get cmdpos
-        cmdpos = [cmdvel[0]*dt, cmdvel[1]*dt]
+    despos = [0, 0]
+    cmdPWM = [0, 0]
+    desvel = [0 ,0]
+    if ((now - cmdtime).to_sec() <= 1.0):
+        # Filter cmd vel
+        desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
+        desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
+
+        # Euler integrate to get despos
+        despos = [desvel[0]*dt, desvel[1]*dt]
+
+        # Generate motor commands (convert wheel speed to PWM)
+        cmdPWM[0] = START_INCPT_L + PWM_SLOPE_L*desvel[0]
+        cmdPWM[1] = START_INCPT_R + PWM_SLOPE_R*desvel[1]
+
+        # update last values
+        lastdesvel = desvel
 
 
     ## Process the encoders, convert to wheel angles!
     # Get encoder readings
     theta_L = encoder.getLeft()*ENC_TO_RAD
     theta_R = encoder.getRight()*ENC_TO_RAD
-
     # Get derivatives
     thetadot_L = (theta_L - last_theta_L) / dt
     thetadot_R = (theta_R - last_theta_R) / dt
-
     # Filter derivatives
     thetadot_L = last_thetadot_L + VEL_TIME_CONST*dt*(thetadot_L - last_thetadot_L)
     thetadot_R = last_thetadot_R + VEL_TIME_CONST*dt*(thetadot_R - last_thetadot_R)
-
     # update last values
     last_theta_L = theta_L
     last_thetadot_L = thetadot_L
     last_theta_R = theta_R
     last_thetadot_R = thetadot_R
 
-    # Generate motor commands (convert wheel speed to PWM)
-    # Send wheel commands.
 
     # Publish the actual wheel state
     msg = JointState()
@@ -104,15 +116,15 @@ def callback_timer(event):
     msg.name         = ['leftwheel', 'rightwheel']
     msg.position     = [theta_L, theta_R]
     msg.velocity     = [thetadot_L, thetadot_R]
-    msg.effort       = [PWML, PWMR]
+    msg.effort       = cmdPWM
     pubact.publish(msg)
 
     # Publish the desired wheel state
     msg = JointState()
-    msg.header.stamp = rospy.Time.now()
+    msg.header.stamp = now
     msg.name         = ['leftwheel', 'rightwheel']
-    msg.position     = cmdpos
-    msg.velocity     = cmdvel
+    msg.position     = despos
+    msg.velocity     = desvel
     msg.effort       = cmdPWM
     pubdes.publish(msg)
 
@@ -126,8 +138,9 @@ if __name__ == "__main__":
     last_thetadot_L = 0
     last_theta_R = 0
     last_thetadot_R = 0
-    last_time = 0
+    last_time = rospy.Time.now()
 
+    lastdesvel = [0, 0]
     cmdvel = []
     cmdtime = []
 
@@ -146,8 +159,7 @@ if __name__ == "__main__":
     sub = rospy.Subscriber("/wheel_command", JointState, callback_command)
 
     # Create the timer.
-    rate = 100
-    duration = rospy.Duration(1.0/rate);  # check!
+    duration = rospy.Duration(1.0/RATE);  # check!
     dt       = duration.to_sec()
     timer    = rospy.Timer(duration, callback_timer)
 
