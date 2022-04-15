@@ -79,7 +79,7 @@ def callback_timer(event):
 
     # Process the commands.
     PWML = trapezoidPWM(now.to_sec())
-    PWMR = -PWMR
+    PWMR = -PWML
     driver.left(PWML)
     driver.right(PWMR)
 
