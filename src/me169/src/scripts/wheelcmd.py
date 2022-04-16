@@ -60,7 +60,7 @@ if __name__ == "__main__":
         rightspeed = float(argv[2])
     
     # Create the generator object.
-    generator = Generator(leftspeed, rightspeed)
+    generator = Generator(2*math.pi, 2*math.pi)
     generator0 = Generator(0, 0)
 
     # Create the timer.
