@@ -35,9 +35,9 @@ CMD_TIME_CONST = RATE / 50.0 # Hz
 POS_TIME_CONST = RATE / 10.0 # Hz
 
 PWM_SLOPE_L = 9.03114 # PWM / (rad/s)
-START_INCPT_L = 50 # PWM val
+START_INCPT_L = 60 # PWM val
 PWM_SLOPE_R = 9.064  # PWM / (rad/s)
-START_INCPT_R = 50 # PWM val
+START_INCPT_R = 60 # PWM val
 
 #
 #   Command Callback Function
@@ -109,8 +109,8 @@ def callback_timer(event):
         # desvel[1] = desvel[1] + (theta_R - despos[1])/POS_TIME_CONST
 
         # Generate motor commands (convert wheel speed to PWM)
-        cmdPWM[0] = START_INCPT_L + PWM_SLOPE_L*desvel[0]
-        cmdPWM[1] = -(START_INCPT_R + PWM_SLOPE_R*desvel[1])
+        cmdPWM[0] = START_INCPT_L*(desvel!=0) + PWM_SLOPE_L*desvel[0]
+        cmdPWM[1] = -(START_INCPT_R*(desvel!=0) + PWM_SLOPE_R*desvel[1])
 
         print(cmdPWM)
 
