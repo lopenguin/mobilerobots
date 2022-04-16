@@ -73,6 +73,7 @@ if __name__ == "__main__":
     # rospy.loginfo("Sending every %f sec..." % dt)
 
     # rospy.spin()
+
     timer    = rospy.Timer(duration, generator0.timercallback)
     rospy.sleep(5.0)
     timer.shutdown()
