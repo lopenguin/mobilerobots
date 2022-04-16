@@ -112,6 +112,9 @@ def callback_timer(event):
         cmdPWM[0] = START_INCPT_L*(desvel!=0) + PWM_SLOPE_L*desvel[0]
         cmdPWM[1] = -(START_INCPT_R*(desvel!=0) + PWM_SLOPE_R*desvel[1])
 
+        cmdPWM[0] = math.floor(cmdPWM[0])
+        cmdPWM[1] = math.floor(cmdPWM[1])
+
         print(cmdPWM)
 
         # update last values
