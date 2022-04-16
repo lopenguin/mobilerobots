@@ -100,7 +100,6 @@ def callback_timer(event):
         # desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
 
         desvel = cmdvel
-        print(cmdvel)
 
         # Euler integrate to get despos
         despos = [desvel[0]*dt, desvel[1]*dt]
@@ -112,6 +111,8 @@ def callback_timer(event):
         # Generate motor commands (convert wheel speed to PWM)
         cmdPWM[0] = START_INCPT_L + PWM_SLOPE_L*desvel[0]
         cmdPWM[1] = -(START_INCPT_R + PWM_SLOPE_R*desvel[1])
+
+        print(cmdPWM)
 
         # update last values
         lastdesvel = desvel
