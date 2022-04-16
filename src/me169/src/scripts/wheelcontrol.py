@@ -109,8 +109,8 @@ def callback_timer(event):
         # desvel[1] = desvel[1] + (theta_R - despos[1])/POS_TIME_CONST
 
         # Generate motor commands (convert wheel speed to PWM)
-        cmdPWM[0] = START_INCPT_L*(desvel!=0) + PWM_SLOPE_L*desvel[0]
-        cmdPWM[1] = -(START_INCPT_R*(desvel!=0) + PWM_SLOPE_R*desvel[1])
+        cmdPWM[0] = START_INCPT_L*(cmdvel[0]!=0) + PWM_SLOPE_L*desvel[0]
+        cmdPWM[1] = -(START_INCPT_R*(cmdvel[1]!=0) + PWM_SLOPE_R*desvel[1])
 
         cmdPWM[0] = math.floor(cmdPWM[0])
         cmdPWM[1] = math.floor(cmdPWM[1])
