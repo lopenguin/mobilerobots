@@ -32,6 +32,7 @@ RATE = 100 # Hz
 ENC_TO_RAD = 1.0/(16 * 45) * 2 * math.pi # rad / enc rev
 VEL_TIME_CONST =  RATE / 5.0 # Hz
 CMD_TIME_CONST = RATE / 50.0 # Hz
+POS_TIME_CONST = RATE / 10.0 # Hz
 
 PWM_SLOPE_L = 9.03114 # PWM / (rad/s)
 START_INCPT_L = 55 # PWM val
@@ -72,28 +73,6 @@ def callback_timer(event):
     dt = (now - last_time).to_sec()
     last_time = now
 
-    ## Process the commands.
-    # only run if command is recent
-    despos = [0, 0]
-    cmdPWM = [0, 0]
-    desvel = [0 ,0]
-    if ((now - cmdtime).to_sec() <= 1.0):
-        # Filter cmd vel
-        # desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
-        # desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
-        desvel = cmdvel
-
-        # Euler integrate to get despos
-        despos = [desvel[0]*dt, desvel[1]*dt]
-
-        # Generate motor commands (convert wheel speed to PWM)
-        cmdPWM[0] = START_INCPT_L + PWM_SLOPE_L*desvel[0]
-        cmdPWM[1] = START_INCPT_R + PWM_SLOPE_R*desvel[1]
-
-        # update last values
-        lastdesvel = desvel
-
-
     ## Process the encoders, convert to wheel angles!
     # Get encoder readings
     theta_L = encoder.getLeft()*ENC_TO_RAD
@@ -109,6 +88,31 @@ def callback_timer(event):
     last_thetadot_L = thetadot_L
     last_theta_R = theta_R
     last_thetadot_R = thetadot_R
+
+    ## Process the commands.
+    # only run if command is recent
+    despos = [0, 0]
+    cmdPWM = [0, 0]
+    desvel = [0 ,0]
+    if ((now - cmdtime).to_sec() <= 1.0):
+        # Filter cmd vel
+        desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
+        desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
+
+        # Euler integrate to get despos
+        despos = [desvel[0]*dt, desvel[1]*dt]
+
+        # # Add corrective factor for position offset
+        # desvel[0] = desvel[0] + (theta_L - despos[0])/POS_TIME_CONST
+        # desvel[1] = desvel[1] + (theta_R - despos[1])/POS_TIME_CONST
+
+        # Generate motor commands (convert wheel speed to PWM)
+        cmdPWM[0] = START_INCPT_L + PWM_SLOPE_L*desvel[0]
+        cmdPWM[1] = START_INCPT_R + PWM_SLOPE_R*desvel[1]
+
+        # update last values
+        lastdesvel = desvel
+
 
     # Command the wheels
     driver.left((cmdPWM[0]))
