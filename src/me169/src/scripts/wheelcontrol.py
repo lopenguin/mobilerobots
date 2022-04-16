@@ -36,7 +36,7 @@ POS_TIME_CONST = RATE / 10.0 # Hz
 
 PWM_SLOPE_L = 9.03114 # PWM / (rad/s)
 START_INCPT_L = 55 # PWM val
-PWM_SLOPE_R = 9.03114  # PWM / (rad/s)
+PWM_SLOPE_R = 9.064  # PWM / (rad/s)
 START_INCPT_R = 55 # PWM val
 
 #
