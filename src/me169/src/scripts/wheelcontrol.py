@@ -67,6 +67,8 @@ def callback_timer(event):
     global last_thetadot_R
 
     global lastdesvel
+    global lastdespos
+    global lastdespos
 
     ## Note the current time to compute dt and populate the ROS messages.
     now = rospy.Time.now()
@@ -91,7 +93,6 @@ def callback_timer(event):
 
     ## Process the commands.
     # only run if command is recent
-    despos = [0, 0]
     cmdPWM = [0, 0]
     desvel = [0 ,0]
     if ((now - cmdtime).to_sec() <= 1.0):
@@ -100,7 +101,8 @@ def callback_timer(event):
         desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
 
         # Euler integrate to get despos
-        despos = [desvel[0]*dt, desvel[1]*dt]
+        despos = [desvel[0]*dt + lastdespos[0], desvel[1]*dt + lastdespos[1]]
+        lastdespos = despos
 
         # # Add corrective factor for position offset
         # desvel[0] = desvel[0] + (theta_L - despos[0])/POS_TIME_CONST
@@ -153,6 +155,7 @@ if __name__ == "__main__":
     last_thetadot_R = 0
 
     lastdesvel = [0, 0]
+    lastdespos = [0, 0]
     cmdvel = [0, 0]
     cmdtime = 0
 
