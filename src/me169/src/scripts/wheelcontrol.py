@@ -96,10 +96,8 @@ def callback_timer(event):
     desvel = [0 ,0]
     if ((now - cmdtime).to_sec() <= 1.0):
         # Filter cmd vel
-        # desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
-        # desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
-
-        desvel = cmdvel
+        desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
+        desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
 
         # Euler integrate to get despos
         despos = [desvel[0]*dt, desvel[1]*dt]
