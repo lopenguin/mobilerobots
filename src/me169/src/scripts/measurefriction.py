@@ -54,7 +54,7 @@ def slowUpPWM(t):
     if (t <= 5):
         return 0
     elif (t <= 15):
-        return math.floor((15 - t) * 255)
+        return math.floor((t - 5)/10 * 255)
 
 #
 #   Timer Callback Function
