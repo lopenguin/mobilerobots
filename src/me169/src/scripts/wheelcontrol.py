@@ -95,6 +95,7 @@ def callback_timer(event):
     # only run if command is recent
     cmdPWM = [0, 0]
     desvel = [0 ,0]
+    despos = lastdespos
     if ((now - cmdtime).to_sec() <= 1.0):
         # Filter cmd vel
         desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
