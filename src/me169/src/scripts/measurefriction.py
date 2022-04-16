@@ -74,7 +74,7 @@ def callback_timer(event):
 
     ## Process the commands.
     # ramp up until motion starts
-    PWML = slowUpPWM(now.to_sec())
+    PWML = slowUpPWM(starttime- now.to_sec())
     PWMR = -PWML
 
     driver.left(PWML)
@@ -160,6 +160,8 @@ if __name__ == "__main__":
     duration = rospy.Duration(1.0/rate);  # check!
     dt       = duration.to_sec()
     timer    = rospy.Timer(duration, callback_timer)
+
+    starttime = rospy.Time.now().to_sec()
 
 
     # Spin while the callbacks are doing all the work.
