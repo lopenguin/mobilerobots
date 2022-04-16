@@ -68,7 +68,6 @@ def callback_timer(event):
 
     global lastdesvel
     global lastdespos
-    global lastdespos
 
     ## Note the current time to compute dt and populate the ROS messages.
     now = rospy.Time.now()
@@ -115,8 +114,6 @@ def callback_timer(event):
 
         cmdPWM[0] = math.floor(cmdPWM[0])
         cmdPWM[1] = math.floor(cmdPWM[1])
-
-        print(cmdPWM)
 
         # update last values
         lastdesvel = desvel
