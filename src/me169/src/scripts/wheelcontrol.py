@@ -53,7 +53,6 @@ def callback_command(msg):
     ## Save
     cmdvel = msg.velocity
     cmdtime = now
-    print(cmdvel)
 
 #
 #   Timer Callback Function
@@ -91,6 +90,7 @@ def callback_timer(event):
         # Generate motor commands (convert wheel speed to PWM)
         cmdPWM[0] = START_INCPT_L + PWM_SLOPE_L*desvel[0]
         cmdPWM[1] = START_INCPT_R + PWM_SLOPE_R*desvel[1]
+        print(cmdPWM)
 
         # update last values
         lastdesvel = desvel
