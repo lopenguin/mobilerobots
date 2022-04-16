@@ -46,7 +46,7 @@ end
 figure(fig);
 clf;
 
-figrows = 3;
+figrows = 2;
 figcols = 1;
 
 % Plot.
@@ -69,33 +69,30 @@ grid on;
 ylabel('Velocity (rad/sec)');
 xlabel('Time (sec)');
 
-ax(3) = subplot(figrows,figcols,3);
-grid on;
-plot(va,ea,'-','LineWidth',1.5,'DisplayName','PWM');
-ylabel('PWM Command');
-xlabel('Velocity (rad/sec)')
-hold on
+% ax(3) = subplot(figrows,figcols,3);
+% grid on;
+% plot(va,ea,'-','LineWidth',1.5,'DisplayName','PWM');
+% ylabel('PWM Command');
+% xlabel('Velocity (rad/sec)')
+% hold on
 
 
-uptimes = find(ta>3.57 & ta<8.03);
-downtimes = find(ta>13.13 & ta<17.72);
-
-rampup = fitlm(va(uptimes),ea(uptimes));
-rampdown = fitlm(va(downtimes),ea(downtimes));
-
-predup = va*rampup.Coefficients.Estimate(2) + rampup.Coefficients.Estimate(1);
-preddown = va*rampdown.Coefficients.Estimate(2)+ rampdown.Coefficients.Estimate(1);
-
-plot(va,predup,'--');
-plot(va,preddown,'--');
-
-slopeup = rampup.Coefficients.Estimate(2)
-slopedown = rampdown.Coefficients.Estimate(2)
-
-avgslope = (slopeup+slopedown)/2
-
-
-
+% uptimes = find(ta>3.57 & ta<8.03);
+% downtimes = find(ta>13.13 & ta<17.72);
+% 
+% rampup = fitlm(va(uptimes),ea(uptimes));
+% rampdown = fitlm(va(downtimes),ea(downtimes));
+% 
+% predup = va*rampup.Coefficients.Estimate(2) + rampup.Coefficients.Estimate(1);
+% preddown = va*rampdown.Coefficients.Estimate(2)+ rampdown.Coefficients.Estimate(1);
+% 
+% plot(va,predup,'--');
+% plot(va,preddown,'--');
+% 
+% slopeup = rampup.Coefficients.Estimate(2)
+% slopedown = rampdown.Coefficients.Estimate(2)
+% 
+% avgslope = (slopeup+slopedown)/2
 
 linkaxes(ax, 'x');
 
@@ -106,6 +103,6 @@ set(gcf, 'PaperPosition', [0.25 0.25 8.00 5]);
 % Return to the top subplot, so subsequent title()'s go here...
 subplot(figrows,figcols,1);
 
-sgtitle("Wheel Speed vs. PWM");
+sgtitle("PWM to Motor Speed");
 
 end

@@ -110,6 +110,9 @@ def callback_timer(event):
     last_theta_R = theta_R
     last_thetadot_R = thetadot_R
 
+    # Command the wheels
+    driver.left((cmdPWM[0]))
+    driver.right((cmdPWM[1]))
 
     # Publish the actual wheel state
     msg = JointState()
