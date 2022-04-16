@@ -53,6 +53,7 @@ def callback_command(msg):
     ## Save
     cmdvel = msg.velocity
     cmdtime = now
+    print(cmdvel)
 
 #
 #   Timer Callback Function
