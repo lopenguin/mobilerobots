@@ -98,8 +98,8 @@ def callback_timer(event):
     despos = lastdespos
     if ((now - cmdtime).to_sec() <= 1.0):
         # Filter cmd vel
-        desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
-        desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
+        # desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
+        # desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
 
         desvel = cmdvel
 
@@ -134,7 +134,7 @@ def callback_timer(event):
     msg.name         = ['leftwheel', 'rightwheel']
     msg.position     = [theta_L, theta_R]
     msg.velocity     = [thetadot_L, thetadot_R]
-    msg.effort       = cmdPWM
+    msg.effort       = [cmdPWM[0], cmdPWM[1]]
     pubact.publish(msg)
 
     # Publish the desired wheel state
@@ -143,7 +143,7 @@ def callback_timer(event):
     msg.name         = ['leftwheel', 'rightwheel']
     msg.position     = despos
     msg.velocity     = desvel
-    msg.effort       = cmdPWM
+    msg.effort       = [cmdPWM[0], cmdPWM[1]]
     pubdes.publish(msg)
 
 
