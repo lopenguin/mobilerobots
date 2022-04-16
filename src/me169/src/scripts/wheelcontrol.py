@@ -34,9 +34,9 @@ VEL_TIME_CONST =  RATE / 5.0 # Hz
 CMD_TIME_CONST = RATE / 50.0 # Hz
 
 PWM_SLOPE_L = 9.03114 # PWM / (rad/s)
-START_INCPT_L = 55 # PWM val
+START_INCPT_L = 60 # PWM val
 PWM_SLOPE_R = 9.064  # PWM / (rad/s)
-START_INCPT_R = 55 # PWM val
+START_INCPT_R = 60 # PWM val
 
 #
 #   Command Callback Function
