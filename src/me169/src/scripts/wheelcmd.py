@@ -10,6 +10,7 @@
 #
 import sys
 import rospy
+import math
 
 from sensor_msgs.msg import JointState
 
@@ -60,18 +61,33 @@ if __name__ == "__main__":
     
     # Create the generator object.
     generator = Generator(leftspeed, rightspeed)
-    
+    generator0 = Generator(0, 0)
 
     # Create the timer.
     duration = rospy.Duration(0.1)
     dt       = duration.to_sec()
-    timer    = rospy.Timer(duration, generator.timercallback)
 
-    # Spin while the callbacks are doing all the work.
-    rospy.loginfo("Wheel commands: left %f rad/sec, right %f rad/sec" %
-                  (leftspeed, rightspeed))
-    rospy.loginfo("Sending every %f sec..." % dt)
-    rospy.spin()
+    # # Spin while the callbacks are doing all the work.
+    # rospy.loginfo("Wheel commands: left %f rad/sec, right %f rad/sec" %
+    #               (leftspeed, rightspeed))
+    # rospy.loginfo("Sending every %f sec..." % dt)
+
+    # rospy.spin()
+    timer    = rospy.Timer(duration, generator0.timercallback)
+    rospy.sleep(5.0)
+    timer.shutdown()
+
+
+    timer    = rospy.Timer(duration, generator.timercallback)
+    rospy.sleep(5.0)
+    timer.shutdown()
+
+    timer    = rospy.Timer(duration, generator0.timercallback)
+    rospy.sleep(5.0)
+    timer.shutdown()
+
+
+
     rospy.loginfo("Stopping...")
 
     # Stop the timer (if not already done).
