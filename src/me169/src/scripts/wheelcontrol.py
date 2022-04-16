@@ -31,12 +31,12 @@ from sensor_msgs.msg import JointState
 RATE = 100 # Hz
 ENC_TO_RAD = 1.0/(16 * 45) * 2 * math.pi # rad / enc rev
 VEL_TIME_CONST =  RATE / 5.0 # Hz
-CMD_TIME_CONST = RATE / TODO # Hz
+CMD_TIME_CONST = RATE / 50.0 # Hz
 
 PWM_SLOPE_L = 9.03114 # PWM / (rad/s)
-START_INCPT_L = TODO # PWM val
+START_INCPT_L = 55 # PWM val
 PWM_SLOPE_R = 9.064  # PWM / (rad/s)
-START_INCPT_R = TODO # PWM val
+START_INCPT_R = 55 # PWM val
 
 #
 #   Command Callback Function
@@ -79,8 +79,9 @@ def callback_timer(event):
     desvel = [0 ,0]
     if ((now - cmdtime).to_sec() <= 1.0):
         # Filter cmd vel
-        desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
-        desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
+        # desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
+        # desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
+        desvel = cmdvel
 
         # Euler integrate to get despos
         despos = [desvel[0]*dt, desvel[1]*dt]
