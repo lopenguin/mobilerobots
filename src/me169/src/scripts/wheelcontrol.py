@@ -141,7 +141,7 @@ if __name__ == "__main__":
     last_thetadot_R = 0
 
     lastdesvel = [0, 0]
-    cmdvel = []
+    cmdvel = [0, 0]
     cmdtime = 0
 
     # Initialize the ROS node.
