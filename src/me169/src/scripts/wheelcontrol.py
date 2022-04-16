@@ -32,7 +32,7 @@ RATE = 100 # Hz
 ENC_TO_RAD = 1.0/(16 * 45) * 2 * math.pi # rad / enc rev
 VEL_TIME_CONST =  RATE / 5.0 # Hz
 CMD_TIME_CONST = RATE / 20.0 # Hz
-POS_TIME_CONST = RATE / 10.0 # Hz
+POS_TIME_CONST = RATE / 20.0 # Hz
 
 PWM_SLOPE_L = 9.03114 # PWM / (rad/s)
 START_INCPT_L = 55 # PWM val
