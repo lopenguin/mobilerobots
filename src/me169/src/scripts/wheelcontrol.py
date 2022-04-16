@@ -78,6 +78,7 @@ def callback_timer(event):
     cmdPWM = [0, 0]
     desvel = [0 ,0]
     if ((now - cmdtime).to_sec() <= 1.0):
+        print(cmdvel)
         # Filter cmd vel
         # desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
         # desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
