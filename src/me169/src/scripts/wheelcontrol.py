@@ -101,6 +101,8 @@ def callback_timer(event):
         desvel[0] = lastdesvel[0] + CMD_TIME_CONST*dt*(cmdvel[0] - lastdesvel[0])
         desvel[1] = lastdesvel[1] + CMD_TIME_CONST*dt*(cmdvel[1] - lastdesvel[1])
 
+        desvel = cmdvel
+
         # Euler integrate to get despos
         despos = [desvel[0]*dt + lastdespos[0], desvel[1]*dt + lastdespos[1]]
         lastdespos = despos
