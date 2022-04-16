@@ -119,8 +119,8 @@ def callback_timer(event):
 
 
     # Command the wheels
-    driver.left((cmdPWM[0]))
-    driver.right((cmdPWM[1]))
+    driver.left(cmdPWM[0])
+    driver.right(cmdPWM[1])
 
     # Publish the actual wheel state
     msg = JointState()
