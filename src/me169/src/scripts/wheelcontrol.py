@@ -142,11 +142,12 @@ if __name__ == "__main__":
 
     lastdesvel = [0, 0]
     cmdvel = []
-    cmdtime = []
+    cmdtime = 0
 
     # Initialize the ROS node.
     rospy.init_node('wheelcontrol')
     last_time = rospy.Time.now()
+    cmdtime = last_time
 
     # Inititlize the low level.
     encoder = Encoder()
