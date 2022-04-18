@@ -104,9 +104,9 @@ def callback_timer(event):
         despos = [desvel[0]*dt + lastdespos[0], desvel[1]*dt + lastdespos[1]]
         lastdespos = despos
 
-        # # Add corrective factor for position offset
-        desvel[0] = desvel[0] + (theta_L - despos[0])/POS_TIME_CONST
-        desvel[1] = desvel[1] + (theta_R - despos[1])/POS_TIME_CONST
+        # Add corrective factor for position offset
+        desvel[0] = desvel[0] + (despos[0] - theta_L)/POS_TIME_CONST
+        desvel[1] = desvel[1] + (despos[1] - theta_R)/POS_TIME_CONST
 
         # Generate motor commands (convert wheel speed to PWM)
         cmdPWM[0] = START_INCPT_L*(cmdvel[0]!=0) + PWM_SLOPE_L*desvel[0]
