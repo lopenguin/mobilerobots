@@ -27,16 +27,16 @@ class Generator:
         self.msg.name.append('rightwheel')
         self.msg.velocity.append(leftspeed)
         self.msg.velocity.append(rightspeed)
-    
+
         # Create a publisher to send wheel commands.
         self.pub = rospy.Publisher('/wheel_command', JointState, queue_size=10)
-       
+
     # Send a message.
     def send(self):
         # Update the message with the current time and publish.
         self.msg.header.stamp = rospy.Time.now()
         self.pub.publish(self.msg)
-       
+
     # Timer callback: Send a message.
     def timercallback(self, event):
         self.send()
@@ -53,14 +53,14 @@ if __name__ == "__main__":
     argv = rospy.myargv(argv=sys.argv)
     if (len(argv) != 3):
         print("Using default: wheelcmd.py 1.0 1.0")
-        leftspeed  = 1.0
-        rightspeed = 1.0
+        leftspeed  = 2*math.pi
+        rightspeed = 2*math.pi
     else:
         leftspeed  = float(argv[1])
         rightspeed = float(argv[2])
-    
+
     # Create the generator object.
-    generator = Generator(2*math.pi, 2*math.pi)
+    generator = Generator(leftspeed, rightspeed)
     generator0 = Generator(0, 0)
 
     # Create the timer.

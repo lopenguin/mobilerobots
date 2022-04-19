@@ -32,7 +32,7 @@ RATE = 100 # Hz
 ENC_TO_RAD = 1.0/(16 * 45) * 2 * math.pi # rad / enc rev
 VEL_TIME_CONST =  RATE / 5.0 # Hz
 CMD_TIME_CONST = RATE / 20.0 # Hz
-POS_TIME_CONST = RATE / 50.0 # Hz
+POS_TIME_CONST = 20 / RATE # s
 
 PWM_SLOPE_L = 9.03114 # PWM / (rad/s)
 START_INCPT_L = 55 # PWM val
@@ -42,7 +42,7 @@ START_INCPT_R = 55 # PWM val
 #
 #   Command Callback Function
 #
-#   Save the command and the time received.
+#   Save the command (velocity) and time of receipt
 #
 def callback_command(msg):
     global cmdvel
@@ -54,6 +54,8 @@ def callback_command(msg):
     ## Save
     cmdvel = msg.velocity
     cmdtime = now
+
+
 
 #
 #   Timer Callback Function
@@ -69,10 +71,12 @@ def callback_timer(event):
     global lastdesvel
     global lastdespos
 
+
     ## Note the current time to compute dt and populate the ROS messages.
     now = rospy.Time.now()
     dt = (now - last_time).to_sec()
     last_time = now
+
 
     ## Process the encoders, convert to wheel angles!
     # Get encoder readings
@@ -90,6 +94,7 @@ def callback_timer(event):
     last_theta_R = theta_R
     last_thetadot_R = thetadot_R
 
+
     ## Process the commands.
     # only run if command is recent
     cmdPWM = [0, 0]
@@ -105,15 +110,27 @@ def callback_timer(event):
         lastdespos = despos
 
         # Add corrective factor for position offset
-        desvel[0] = desvel[0] + (despos[0] - theta_L)/POS_TIME_CONST
-        desvel[1] = desvel[1] + (despos[1] - theta_R)/POS_TIME_CONST
+        vcorrect = [0, 0]
+        vcorrect[0] = (despos[0] - theta_L)/POS_TIME_CONST
+        vcorrect[1] = (despos[1] - theta_R)/POS_TIME_CONST
 
         # Generate motor commands (convert wheel speed to PWM)
-        cmdPWM[0] = START_INCPT_L*(cmdvel[0]!=0) + PWM_SLOPE_L*desvel[0]
-        cmdPWM[1] = -(START_INCPT_R*(cmdvel[1]!=0) + PWM_SLOPE_R*desvel[1])
+        cmdPWM[0] = START_INCPT_L*(cmdvel[0]!=0) + PWM_SLOPE_L*(desvel[0] + vcorrect[0])
+        cmdPWM[1] = START_INCPT_R*(cmdvel[1]!=0) + PWM_SLOPE_R*(desvel[1] + vcorrect[1])
 
         cmdPWM[0] = math.floor(cmdPWM[0])
         cmdPWM[1] = math.floor(cmdPWM[1])
+
+        # establish limits
+        if (cmdPWM[0] > 255):
+            cmdPWM[0] = 254
+        if (cmdPWM[0] < -255):
+            cmdPWM[0] = -254
+
+        if (cmdPWM[1] > 255):
+            cmdPWM[1] = 254
+        if (cmdPWM[1] < -255):
+            cmdPWM[1] = -254
 
         # update last values
         lastdesvel = desvel

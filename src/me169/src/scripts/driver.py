@@ -18,7 +18,7 @@ import time
 #
 class Driver:
     # Initialize.
-    def __init__(self, chL = 1, chR = 0, reverseL = 1, reverseR = 1):
+    def __init__(self, chL = 1, chR = 0, reverseL = 1, reverseR = 0):
         # Pick/save the parameters.
         self.chL  = chL
         self.chR  = chR
@@ -68,13 +68,13 @@ if __name__ == "__main__":
     # Try a sinple move.
     print('Test driving forward...');
     driver.left(150)
-    driver.right(-150)
-    time.sleep(1.0)
+    driver.right(150)
+    time.sleep(5.0)
 
     print('Test spinning right (negative Z)...');
     driver.left(110)
-    driver.right(110)
-    time.sleep(1.0)
+    driver.right(-110)
+    time.sleep(5.0)
 
     # Cleanup (disabling the motors).
     driver.shutdown()

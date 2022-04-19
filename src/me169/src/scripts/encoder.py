@@ -157,7 +157,7 @@ if __name__ == "__main__":
     try:
         while True:
             print("Encoders:  Left %5d - Right %5d" %
-                  (encoder.leftencoder(), encoder.rightencoder()))
+                  (encoder.getLeft(), encoder.getRight()))
             time.sleep(0.05)
     except (KeyboardInterrupt, SystemExit) as exErr:
         print("Ending due to exception: %s" % repr(exErr))
