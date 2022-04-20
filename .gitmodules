@@ -1,0 +1,3 @@
+[submodule "src/src/shared"]
+	path = src/src/shared
+	url = https://gitlab.caltech.edu/cs169-22sp/cs169-shared.git
