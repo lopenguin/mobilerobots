@@ -159,7 +159,7 @@ def callback_timer(event):
     # Publish the actual wheel state /wheel_state
     msg = JointState()
     msg.header.stamp = now
-    msg.name         = ['leftwheel', 'rightwheel', 'global']
+    msg.name         = ['leftwheel', 'rightwheel', 'gyro']
     msg.position     = [theta_L, theta_R, radz]
     msg.velocity     = [thetadot_L, thetadot_R, radzdot]
     msg.effort       = [cmdPWM[0], cmdPWM[1], 0.0]
@@ -168,7 +168,7 @@ def callback_timer(event):
     # Publish the desired wheel state /wheel_desired
     msg = JointState()
     msg.header.stamp = now
-    msg.name         = ['leftwheel', 'rightwheel', 'global']
+    msg.name         = ['leftwheel', 'rightwheel', 'body']
     msg.position     = [despos[0], despos[1], 0.0]
     msg.velocity     = [desvel[0], desvel[1], enc_radzdot]  # TODO: UPDATE
     msg.effort       = [cmdPWM[0], cmdPWM[1], 0.0]
@@ -180,33 +180,13 @@ def callback_timer(event):
 #
 def encToGlobal(enctdot_L, enctdot_R):
     ## Vehicle Constants
-    wheelrad = 33.0 # mm
-    fullwidth = 137.0 # mm (wheel-to-wheel spacing)
+    R = 33.0 # mm
+    d2 = 137.0 # mm (wheel-to-wheel spacing)
 
-    # convert encoders to linear wheel speeds
-    v_L = enctdot_L * wheelrad # mm/s
-    v_R = enctdot_R * wheelrad # mm/s
+    vx = enctdot_L*R/2   + enctdot_R*R/2
+    wz = -enctdot_L*R/d2 + enctdot_R*R/d2
 
-    # cases:
-    if (v_L > 0 and v_R > 0) or (v_L < 0 and v_R < 0):
-        # same sign
-        if (abs(v_L) < abs(v_R)):
-            # turning about a point to the left
-            rL = fullwidth*v_L/(v_R - v_L)
-            radzdot = v_L / rL
-        if (abs(v_L) > abs(v_R)):
-            # turning about a point to the right
-            rR = fullwidth*v_R/(v_L - v_R)
-            radzdot = v_R / rR
-    elif (v_L != 0 and v_R != 0 and v_L != -v_R):
-        rL = fullwidth*v_L/(v_R - v_L)
-        radzdot = v_L / rL
-    elif (v_L == -v_R):
-        radzdot = v_L / (fullwidth/2)
-    else:
-        radzdot = 0.0
-
-    return radzdot
+    return (vx, wz)
 
 #
 #   Main Code

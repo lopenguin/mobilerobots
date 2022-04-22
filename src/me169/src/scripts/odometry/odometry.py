@@ -62,12 +62,12 @@ class OdometryObj:
     # Velocity Command Message Callback
     def cb_vel_cmd(self, msg):
         # Grab the forward and spin (velocity) commands.
-        forwardvel_cmd = msg.linear.x
-        spinvel_cmd = msg.angular.z
+        vx_cmd = msg.linear.x
+        wz_cmd = msg.angular.z
 
         # CONVERT THE BODY VELOCITY COMMANDS TO L/R WHEEL COMMANDS
-        lpsi_dot = SOMETHING
-        rpsi_dot = SOMETHING
+        lpsi_dot = vx_cmd*1/R - wz_cmd*d/R
+        rpsi_dot = vx_cmd*1/R + wz_cmd*d/R
 
         # Create the wheel command msg and publish.  Note the incoming
         # message does not have a time stamp, so generate one here.
@@ -80,12 +80,21 @@ class OdometryObj:
 
     # Wheel State Message Callback
     def cb_wheel_state(self, msg):
-        # Grab the timestamp, wheel and gyro position/velocities.
+        ## Grab the timestamp, wheel and gyro position/velocities.
+        timestamp = msg.header.stamp
 
         lpsi = msg.position[msg.name.index('leftwheel')]
+        lpsi_dot = msg.velocity[msg.name.index('leftwheel')]
 
-        AND MORE
+        rpsi = msg.position[msg.name.index('rightwheel')]
+        rpsi_dot = msg.velocity[msg.name.index('rightwheel')]
 
+        gyro_radz = msg.position[msg.name.index('gyro')]
+        gyro_radzdot = msg.velocity[msg.name.index('gyro')]
+
+
+        ## define intermediate variables
+        dp = R/2*(lpsi_dot - rpsi_dot)...
 
 
         # Update the pose.
