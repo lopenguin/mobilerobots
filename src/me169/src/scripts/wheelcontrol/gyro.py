@@ -17,23 +17,41 @@ import time
 class Gyro:
     # I2C Definitions and Communication
     I2C_ADDR = 0x69
+    WHO_AM_I = 0xEA
 
-    REG_CONFIG   = 0x1A
-    REG_GYROCFG  = 0x1B
-    REG_GYROX    = 0x43
-    REG_GYROY    = 0x45
-    REG_GYROZ    = 0x47
-    REG_PWRMGMT1 = 0x6B
-    REG_ADDR     = 0x75
+    BANKREG_ID = (0, 0x00)
+    BANKREG_PWRMGMT1 = (0, 0x06)
+    BANKREG_GYROCFG = (2, 0x01)
+    BANKREG_GYROZ    = (0, 0x37)
+    BANKREG_INTSTATUS1 = (0, 0x1A)
 
-    def readReg(self, reg):
+    REG_BANK_SEL = 0x7F
+
+    # Set range: (range, bit divider)
+    # RANGE = (250, 131)
+    RANGE = (500, 65.5)
+    # RANGE = (1000, 32.8)
+    # RANGE = (2000, 16.4)
+
+    def setBank(self, bank):
+        self.i2cbus.write_byte_data(self.I2C_ADDR, self.REG_BANK_SEL, bank)
+
+    def readReg(self, bankreg):
+        self.setBank(bankreg[0])
+        reg = bankreg[1]
         return self.i2cbus.read_byte_data(self.I2C_ADDR, reg)
-    def writeReg(self, reg, byte):
+    def writeReg(self, bankreg, byte):
+        self.setBank(bankreg[0])
+        reg = bankreg[1]
         self.i2cbus.write_byte_data(self.I2C_ADDR, reg, byte)
 
-    def readRegList(self, reg, N):
+    def readRegList(self, bankreg, N):
+        self.setBank(bankreg[0])
+        reg = bankreg[1]
         return self.i2cbus.read_i2c_block_data(self.I2C_ADDR, reg, N)
-    def writeRegList(self, reg, bytelist):
+    def writeRegList(self, bankreg, bytelist):
+        self.setBank(bankreg[0])
+        reg = bankreg[1]
         self.i2cbus.write_i2c_block_data(self.I2C_ADDR, reg, bytelist)
 
 
@@ -43,15 +61,17 @@ class Gyro:
         self.i2cbus = i2cbus
 
         # Confirm a connection to the IMU and gyro.
-        if (self.readReg(self.REG_ADDR) != self.I2C_ADDR):
+        if (self.readReg(self.BANKREG_ID) != self.WHO_AM_I):
             raise Exception("IMU not connected!")
 
-        # Set the clock source to match Gyro Z (more precise).
-        self.writeReg(self.REG_PWRMGMT1, 0x03)
 
-        # Set the gyroscope low-pass filter to 42Hz so we have to
-        # sample at >=42Hz to avoid aliasing.
-        self.writeReg(self.REG_CONFIG, 0x03)
+        # power mgmt
+        pwrmgmt1 = self.readReg(self.BANKREG_PWRMGMT1)
+        self.writeReg(self.BANKREG_PWRMGMT1, pwrmgmt1 & ~(1<<6))
+
+        # Set the gyroscope low-pass filter to 51.2Hz so we have to
+        # sample at >=51.2Hz to avoid aliasing.
+        self.writeReg(self.BANKREG_GYROCFG, 0x1B)
 
         # Wait 50ms to let the setup and filter change settle.
         time.sleep(0.05)
@@ -82,7 +102,9 @@ class Gyro:
 
         # Determine and set the actual scale.
         self.scale = math.radians(250.0) * (2 ** scalenum)
-        self.writeReg(self.REG_GYROCFG, scalenum << 3)
+        reg = self.readReg(self.BANKREG_GYROCFG)
+        reg = reg & (0b11111001 | scalenum << 1)    # CHECK
+        self.writeReg(self.BANKREG_GYROCFG, reg)
 
         # Let the change take effect before the next sample is read.
         time.sleep(0.01)
@@ -109,7 +131,7 @@ class Gyro:
 
         # Report and check whether the std is above an acceptable
         # limit which would imply movement.
-        stdlim = 0.01
+        stdlim = 0.1
         print("Gyro offset %.3f rad/sec (std %.3f <= %.3f limit)"
               % (avg, std, stdlim))
         if (std > stdlim):
@@ -121,19 +143,18 @@ class Gyro:
 
     def readraw(self):
         # Grab the high (first) and low byte (second) in one read.
-        bytes = self.readRegList(self.REG_GYROZ, 2)
+        bytes = self.readRegList(self.BANKREG_GYROZ, 2)
 
         # Convert into a signed 16bit number.
-        GIVEN bytes[0] and bytes[1], create a single 16bit SIGNED integer!
-        Value = ....
-        How do you make sure the sign is good?
+        value = (bytes[0] << 8) | (bytes[1] & 0xFF)  # combine bytes
+        if (value > 32767):
+            value -= 65536
 
         # Check for saturation.
         saturated = ((value > 32700) or (value < -32700))
 
         # Scale into rad/sec.
-        Given the value and the full scale, can you determine:
-        omegaraw = SOMETHING
+        omegaraw = math.radians(value / self.RANGE[1])
 
         # Return the speed and saturation flag.
         return (omegaraw, saturated)

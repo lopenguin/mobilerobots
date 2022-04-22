@@ -36,7 +36,7 @@ class Driver:
 
 
     # Initialize.
-    def __init__(self, i2cbus, chL = 0, chR = 1, reverseL = 1, reverseR = 1):
+    def __init__(self, i2cbus, chL = 1, chR = 0, reverseL = 1, reverseR = 0):
         # Save the I2C bus object.
         self.i2cbus = i2cbus
 
@@ -45,7 +45,7 @@ class Driver:
         self.chR  = chR
         self.revL = reverseL
         self.revR = reverseR
-    
+
         # Confirm a connection to the motor driver.
         if (self.readReg(self.REG_ID) != self.ID):
             raise Exception("Motor Driver not connected!")
@@ -98,7 +98,7 @@ class Driver:
 if __name__ == "__main__":
     # Grab the I2C bus.
     i2cbus = smbus.SMBus(1)
-    
+
     # Initialize the motor driver.
     driver = Driver(i2cbus)
 

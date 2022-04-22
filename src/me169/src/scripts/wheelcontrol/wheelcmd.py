@@ -53,8 +53,8 @@ if __name__ == "__main__":
     argv = rospy.myargv(argv=sys.argv)
     if (len(argv) != 3):
         print("Using default: wheelcmd.py 1.0 1.0")
-        leftspeed  = 2*math.pi
-        rightspeed = 2*math.pi
+        leftspeed  = math.pi
+        rightspeed = -math.pi
     else:
         leftspeed  = float(argv[1])
         rightspeed = float(argv[2])

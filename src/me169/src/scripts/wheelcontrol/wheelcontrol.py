@@ -21,9 +21,11 @@ import math
 import sys
 import time
 import rospy
+import smbus
 
 from encoder import Encoder
-from driver import Driver
+from driver_replacement import Driver
+from gyro import Gyro
 
 from sensor_msgs.msg import JointState
 
@@ -67,6 +69,7 @@ def callback_timer(event):
     global last_thetadot_L
     global last_theta_R
     global last_thetadot_R
+    global last_radzdot
 
     global lastdesvel
     global lastdespos
@@ -93,6 +96,19 @@ def callback_timer(event):
     last_thetadot_L = thetadot_L
     last_theta_R = theta_R
     last_thetadot_R = thetadot_R
+
+
+    ## Process the Gyro
+    (radzdot, sat) = gyro.read()  # rad/
+    if not sat:
+        radz = dt*radzdot + last_radzdot    # rad
+        # update last radz
+        last_radzdot = radzdot
+
+
+    ## Process encoder for theta dot
+    enc_radzdot = encToGlobal(thetadot_L, thetadot_R)
+    print(radzdot, enc_radzdot)
 
 
     ## Process the commands.
@@ -140,34 +156,71 @@ def callback_timer(event):
     driver.left(cmdPWM[0])
     driver.right(cmdPWM[1])
 
-    # Publish the actual wheel state
+    # Publish the actual wheel state /wheel_state
     msg = JointState()
     msg.header.stamp = now
-    msg.name         = ['leftwheel', 'rightwheel']
-    msg.position     = [theta_L, theta_R]
-    msg.velocity     = [thetadot_L, thetadot_R]
-    msg.effort       = [cmdPWM[0], cmdPWM[1]]
+    msg.name         = ['leftwheel', 'rightwheel', 'global']
+    msg.position     = [theta_L, theta_R, radz]
+    msg.velocity     = [thetadot_L, thetadot_R, radzdot]
+    msg.effort       = [cmdPWM[0], cmdPWM[1], 0.0]
     pubact.publish(msg)
 
-    # Publish the desired wheel state
+    # Publish the desired wheel state /wheel_desired
     msg = JointState()
     msg.header.stamp = now
-    msg.name         = ['leftwheel', 'rightwheel']
-    msg.position     = despos
-    msg.velocity     = desvel
-    msg.effort       = [cmdPWM[0], cmdPWM[1]]
+    msg.name         = ['leftwheel', 'rightwheel', 'global']
+    msg.position     = [despos[0], despos[1], 0.0]
+    msg.velocity     = [desvel[0], desvel[1], enc_radzdot]  # TODO: UPDATE
+    msg.effort       = [cmdPWM[0], cmdPWM[1], 0.0]
     pubdes.publish(msg)
 
+
+#
+#   Encoder angular speed to global rad/s
+#
+def encToGlobal(enctdot_L, enctdot_R):
+    ## Vehicle Constants
+    wheelrad = 33.0 # mm
+    fullwidth = 137.0 # mm (wheel-to-wheel spacing)
+
+    # convert encoders to linear wheel speeds
+    v_L = enctdot_L * wheelrad # mm/s
+    v_R = enctdot_R * wheelrad # mm/s
+
+    # cases:
+    if (v_L > 0 and v_R > 0) or (v_L < 0 and v_R < 0):
+        # same sign
+        if (abs(v_L) < abs(v_R)):
+            # turning about a point to the left
+            rL = fullwidth*v_L/(v_R - v_L)
+            radzdot = v_L / rL
+        if (abs(v_L) > abs(v_R)):
+            # turning about a point to the right
+            rR = fullwidth*v_R/(v_L - v_R)
+            radzdot = v_R / rR
+    elif (v_L != 0 and v_R != 0 and v_L != -v_R):
+        rL = fullwidth*v_L/(v_L + v_R)
+        radzdot = v_L / rL
+    elif (v_L == -v_R):
+        radzdot = v_L / (fullwidth/2)
+    else:
+        radzdot = 0.0
+
+    return radzdot
 
 #
 #   Main Code
 #
 if __name__ == "__main__":
+    # Grab the I2C bus.
+    i2cbus = smbus.SMBus(1)
+
     # Global variables
     last_theta_L = 0
     last_thetadot_L = 0
     last_theta_R = 0
     last_thetadot_R = 0
+    last_radzdot = 0
 
     lastdesvel = [0, 0]
     lastdespos = [0, 0]
@@ -181,7 +234,8 @@ if __name__ == "__main__":
 
     # Inititlize the low level.
     encoder = Encoder()
-    driver  = Driver()
+    driver  = Driver(i2cbus)
+    gyro    = Gyro(i2cbus)
 
     # Create a publisher to send the wheel desired and actual (state).
     pubdes = rospy.Publisher('/wheel_desired', JointState, queue_size=10)
