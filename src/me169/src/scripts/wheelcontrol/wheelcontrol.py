@@ -69,7 +69,7 @@ def callback_timer(event):
     global last_thetadot_L
     global last_theta_R
     global last_thetadot_R
-    global last_radzdot
+    global last_radz
 
     global lastdesvel
     global lastdespos
@@ -99,16 +99,18 @@ def callback_timer(event):
 
 
     ## Process the Gyro
-    (radzdot, sat) = gyro.read()  # rad/
+    (radzdot, sat) = gyro.read()  # rad/s
+    # NOTE: not working
+    radz = last_radz
     if not sat:
-        radz = dt*radzdot + last_radzdot    # rad
+        radz = dt*radzdot + last_radz   # rad
         # update last radz
-        last_radzdot = radzdot
+        last_radz = radz
 
 
     ## Process encoder for theta dot
     enc_radzdot = encToGlobal(thetadot_L, thetadot_R)
-    print(radzdot, enc_radzdot)
+    enc_radzdot = enc_radzdot[1]
 
 
     ## Process the commands.
@@ -168,7 +170,7 @@ def callback_timer(event):
     # Publish the desired wheel state /wheel_desired
     msg = JointState()
     msg.header.stamp = now
-    msg.name         = ['leftwheel', 'rightwheel', 'body']
+    msg.name         = ['leftwheel', 'rightwheel', 'gyro']
     msg.position     = [despos[0], despos[1], 0.0]
     msg.velocity     = [desvel[0], desvel[1], enc_radzdot]  # TODO: UPDATE
     msg.effort       = [cmdPWM[0], cmdPWM[1], 0.0]
@@ -200,7 +202,7 @@ if __name__ == "__main__":
     last_thetadot_L = 0
     last_theta_R = 0
     last_thetadot_R = 0
-    last_radzdot = 0
+    last_radz = 0
 
     lastdesvel = [0, 0]
     lastdespos = [0, 0]

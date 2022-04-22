@@ -49,26 +49,27 @@ clf;
 figrows = 2;
 figcols = 1;
 
-% % Plot.
-% ax(1) = subplot(figrows,figcols,1);
-% hold on;
-% %if ~isempty(pc), plot(tc,pc,'--','LineWidth',1.5,'DisplayName','Command'); end
-% if ~isempty(pd), plot(td,pd,':', 'LineWidth',1.5,'DisplayName','Encoder'); end
-% if ~isempty(pa), plot(ta,pa,'-', 'LineWidth',1.5,'DisplayName','Gyro');  end
-% grid on;
-% ylabel('Position (rad)');
-% %sgtitle(['Data for ' joint]);
+% Plot.
+ax(1) = subplot(figrows,figcols,1);
+hold on;
+%if ~isempty(pc), plot(tc,pc,'--','LineWidth',1.5,'DisplayName','Command'); end
+if ~isempty(pd), plot(td,pd,':', 'LineWidth',1.5,'DisplayName','Encoder'); end
+%if ~isempty(pa), plot(ta,pa,'-', 'LineWidth',1.5,'DisplayName','Gyro');  end
+grid on;
+ylabel('Position (rad)');
+%sgtitle(['Data for ' joint]);
 
-% legend;
-% 
-% ax(2) = subplot(figrows,figcols,2);
-% hold on
-% if ~isempty(vc), plot(tc,vc,'--','LineWidth',1.5,'DisplayName','Command'); end
+legend;
 
-
-if ~isempty(vd), plot(td,-vd,':', 'LineWidth',1.5,'DisplayName','Encoder'); end
+ax(2) = subplot(figrows,figcols,2);
 hold on
+if ~isempty(vc), plot(tc,vc,'--','LineWidth',1.5,'DisplayName','Command'); end
+yyaxis left
+if ~isempty(vd), plot(td,vd,':', 'LineWidth',1.5,'DisplayName','Encoder'); end
+hold on
+yyaxis right
 if ~isempty(va), plot(ta,va,'-', 'LineWidth',1.5,'DisplayName','Gyro');  end
+ylim([-4,4])
 grid on;
 ylabel('Velocity (rad/sec)');
 xlabel('Time (sec)');

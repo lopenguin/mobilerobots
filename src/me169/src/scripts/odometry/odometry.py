@@ -27,8 +27,8 @@ from sensor_msgs.msg   import JointState
 #
 #   Constants
 #
-R = 33.0   # Wheel radius (mm)
-d = 68.5   # Halfwidth between wheels (mm)
+R = 33.0 / 1000   # Wheel radius (m)
+d = 68.5 / 1000  # Halfwidth between wheels (m)
 
 
 #
@@ -41,6 +41,9 @@ class OdometryObj:
         self.x = 0.0
         self.y = 0.0
         self.theta = 0.0
+
+        # variable to save last wheel state time
+        self.last_wheelstate_time = rospy.Time()
 
         # Create a publisher to send wheel commands.
         self.pub_wcmd = rospy.Publisher('/wheel_command', JointState,
@@ -82,6 +85,8 @@ class OdometryObj:
     def cb_wheel_state(self, msg):
         ## Grab the timestamp, wheel and gyro position/velocities.
         timestamp = msg.header.stamp
+        dt = (timestamp - self.last_wheelstate_time).to_sec()
+        self.last_wheelstate_time = timestamp
 
         lpsi = msg.position[msg.name.index('leftwheel')]
         lpsi_dot = msg.velocity[msg.name.index('leftwheel')]
@@ -93,14 +98,21 @@ class OdometryObj:
         gyro_radzdot = msg.velocity[msg.name.index('gyro')]
 
 
-        ## define intermediate variables
-        dp = R/2*(lpsi_dot - rpsi_dot)...
+        ## Compute vel and orientation using encoders
+        vx = R/2     * (rpsi_dot + lpsi_dot)
+        # wz = R/(2*d) * (rpsi_dot - lpsi_dot)
+        wz = gyro_radzdot
+
+
+        ## define intermediates: position and angle change
+        dp     = vx * dt
+        dtheta = wz * dt
 
 
         # Update the pose.
-        self.x    += dp * ...
-        self.y    += dp * ...
-        self.theta
+        self.x     += dp * math.cos(self.theta + dtheta/2)
+        self.y     += dp * math.sin(self.theta + dtheta/2)
+        self.theta = gyro_radz
 
         # Convert to a ROS Point, Quaternion, Twist (lin&ang veloocity).
         p = Point(self.x, self.y, 0.0)

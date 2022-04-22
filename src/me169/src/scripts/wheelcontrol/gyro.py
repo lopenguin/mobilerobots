@@ -34,6 +34,7 @@ class Gyro:
     # RANGE = (2000, 16.4)
 
     def setBank(self, bank):
+        bank = ((bank << 4) & 0x30)
         self.i2cbus.write_byte_data(self.I2C_ADDR, self.REG_BANK_SEL, bank)
 
     def readReg(self, bankreg):
@@ -77,7 +78,7 @@ class Gyro:
         time.sleep(0.05)
 
         # Set the gyro scale (default 500 deg/sec).  Feel free to change.
-        self.setscale(scale)
+        self.setscale()
 
         # Set the offset by calibration.
         self.offset = self.calibrate()
@@ -95,7 +96,8 @@ class Gyro:
 
 
     # Set the Gyro scale (in rad/sec).
-    def setscale(self, scale):
+    def setscale(self):
+        scale = self.RANGE[0]
         # Compute the range (250, 500, 1000, or 2000 deg/sec).
         scalenum = int(math.ceil(math.log2(scale / math.radians(250.0))))
         scalenum = min(max(scalenum, 0), 3)
@@ -103,7 +105,8 @@ class Gyro:
         # Determine and set the actual scale.
         self.scale = math.radians(250.0) * (2 ** scalenum)
         reg = self.readReg(self.BANKREG_GYROCFG)
-        reg = reg & (0b11111001 | scalenum << 1)    # CHECK
+        reg = (reg & ~(0b00000110)) # clear IMU bits
+        reg = reg | (scalenum << 1)    # CHECK
         self.writeReg(self.BANKREG_GYROCFG, reg)
 
         # Let the change take effect before the next sample is read.
