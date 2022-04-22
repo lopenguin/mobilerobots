@@ -199,7 +199,7 @@ def encToGlobal(enctdot_L, enctdot_R):
             rR = fullwidth*v_R/(v_L - v_R)
             radzdot = v_R / rR
     elif (v_L != 0 and v_R != 0 and v_L != -v_R):
-        rL = fullwidth*v_L/(v_L + v_R)
+        rL = fullwidth*v_L/(v_R - v_L)
         radzdot = v_L / rL
     elif (v_L == -v_R):
         radzdot = v_L / (fullwidth/2)
