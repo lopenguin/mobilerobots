@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #   wheelcontrol_skeleton.py
 #
@@ -30,11 +30,13 @@ from gyro import Gyro
 from sensor_msgs.msg import JointState
 
 ## CONSTANTS
-RATE = 100 # Hz
+LOW_LEVEL_RATE = 100 # Hz
+ROS_SEND_RATE = 75 # Hz
+
 ENC_TO_RAD = 1.0/(16 * 45) * 2 * math.pi # rad / enc rev
-VEL_TIME_CONST =  RATE / 5.0 # Hz
-CMD_TIME_CONST = RATE / 20.0 # Hz
-POS_TIME_CONST = 20 / RATE # s
+VEL_TIME_CONST =  LOW_LEVEL_RATE / 5.0 # Hz
+CMD_TIME_CONST = LOW_LEVEL_RATE / 20.0 # Hz
+POS_TIME_CONST = 20 / LOW_LEVEL_RATE # s
 
 PWM_SLOPE_L = 9.03114 # PWM / (rad/s)
 START_INCPT_L = 55 # PWM val
@@ -73,6 +75,10 @@ def callback_timer(event):
 
     global lastdesvel
     global lastdespos
+
+    global desmsg
+    global actmsg
+    global newmsg
 
 
     ## Note the current time to compute dt and populate the ROS messages.
@@ -158,23 +164,39 @@ def callback_timer(event):
     driver.left(cmdPWM[0])
     driver.right(cmdPWM[1])
 
+
+    newmsg = False
+    
     # Publish the actual wheel state /wheel_state
-    msg = JointState()
-    msg.header.stamp = now
-    msg.name         = ['leftwheel', 'rightwheel', 'gyro']
-    msg.position     = [theta_L, theta_R, radz]
-    msg.velocity     = [thetadot_L, thetadot_R, radzdot]
-    msg.effort       = [cmdPWM[0], cmdPWM[1], 0.0]
-    pubact.publish(msg)
+    actmsg = JointState()
+    actmsg.header.stamp = now
+    actmsg.name         = ['leftwheel', 'rightwheel', 'gyro']
+    actmsg.position     = [theta_L, theta_R, radz]
+    actmsg.velocity     = [thetadot_L, thetadot_R, radzdot]
+    actmsg.effort       = [cmdPWM[0], cmdPWM[1], 0.0]
 
     # Publish the desired wheel state /wheel_desired
-    msg = JointState()
-    msg.header.stamp = now
-    msg.name         = ['leftwheel', 'rightwheel', 'gyro']
-    msg.position     = [despos[0], despos[1], 0.0]
-    msg.velocity     = [desvel[0], desvel[1], enc_radzdot]  # TODO: UPDATE
-    msg.effort       = [cmdPWM[0], cmdPWM[1], 0.0]
-    pubdes.publish(msg)
+    desmsg = JointState()
+    desmsg.header.stamp = now
+    desmsg.name         = ['leftwheel', 'rightwheel']
+    desmsg.position     = [despos[0], despos[1]]
+    desmsg.velocity     = [desvel[0], desvel[1]]
+    desmsg.effort       = [cmdPWM[0], cmdPWM[1]]
+
+    newmsg = True
+
+def pub_timer(event):
+    global newmsg
+    if (newmsg):
+        now = rospy.Time.now()
+
+        # Publish the actual wheel state /wheel_state
+        pubact.publish(actmsg)
+
+        # Publish the desired wheel state /wheel_desired
+        pubdes.publish(desmsg)
+
+        newmsg = False
 
 
 #
@@ -209,6 +231,10 @@ if __name__ == "__main__":
     cmdvel = [0, 0]
     cmdtime = 0
 
+    desmsg = JointState()
+    actmsg = JointState()
+    newmsg = False
+
     # Initialize the ROS node.
     rospy.init_node('wheelcontrol')
     last_time = rospy.Time.now()
@@ -226,10 +252,14 @@ if __name__ == "__main__":
     # Create a subscriber to listen to wheel commands.
     sub = rospy.Subscriber("/wheel_command", JointState, callback_command)
 
-    # Create the timer.
-    duration = rospy.Duration(1.0/RATE);  # check!
+    # Create the low level timer.
+    duration = rospy.Duration(1.0/LOW_LEVEL_RATE);  # check!
     dt       = duration.to_sec()
     timer    = rospy.Timer(duration, callback_timer)
+
+    # Create the publishing timer
+    pubduration = rospy.Duration(1.0/ROS_SEND_RATE)
+    pubtimer = rospy.Timer(pubduration, pub_timer)
 
 
     # Spin while the callbacks are doing all the work.
@@ -237,8 +267,9 @@ if __name__ == "__main__":
     rospy.spin()
     rospy.loginfo("Stopping...")
 
-    # Stop the timer (if not already done).
+    # Stop the timers (if not already done).
     timer.shutdown()
+    pubtimer.shutdown()
 
     # Clean up the low level.
     driver.shutdown()

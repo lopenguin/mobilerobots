@@ -99,7 +99,7 @@ class Gyro:
     def setscale(self):
         scale = self.RANGE[0]
         # Compute the range (250, 500, 1000, or 2000 deg/sec).
-        scalenum = int(math.ceil(math.log2(scale / math.radians(250.0))))
+        scalenum = int(math.ceil(math.log2(scale / 250)))
         scalenum = min(max(scalenum, 0), 3)
 
         # Determine and set the actual scale.
@@ -107,7 +107,9 @@ class Gyro:
         reg = self.readReg(self.BANKREG_GYROCFG)
         reg = (reg & ~(0b00000110)) # clear IMU bits
         reg = reg | (scalenum << 1)    # CHECK
+        print(scalenum)
         self.writeReg(self.BANKREG_GYROCFG, reg)
+        print(self.readReg(self.BANKREG_GYROCFG))
 
         # Let the change take effect before the next sample is read.
         time.sleep(0.01)
@@ -170,7 +172,7 @@ class Gyro:
             (omega, saturated) = self.readraw()
 
             # Subtract the offset and save the reading.
-            self.reading = (omega - self.offset, saturated)
+            self.reading = (-(omega - self.offset), saturated)
 
         except:
             # Do not update the reading.

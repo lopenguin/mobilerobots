@@ -19,12 +19,12 @@
 
   <!-- Run wheel control and sensor processes -->
 	<node pkg="me169"
-	type="wheelcontrol.py" 
+	type="$(find me169)/scripts/wheelcontrol/wheelcontrol.py" 
 	name="wheel_control" 
 	output="screen"/>
 	
 	<node pkg="me169" 
-	type="odometry.py" 
+	type="$(find me169)/scripts/odometry/odometry.py" 
 	name="odometry"
 	output="screen"/>
 
