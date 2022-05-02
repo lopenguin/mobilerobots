@@ -1,0 +1,66 @@
+<launch>
+  <!-- Test the odometry node (and lower levels). -->
+
+  <!-- URDF parameter. -->
+  <arg name="urdf"  default="bot.urdf"/>
+  <arg name="model" default="$(find bot_description)/urdf/$(arg urdf)"/>
+
+  <!-- Rviz configuration file parameter. -->
+  <arg name="cfg"   default="$(find me169)/rviz/laserscan.rviz"/>
+
+
+  <!-- Load the URDF file into the robot_description parameter. -->
+  <param name="robot_description" textfile="$(arg model)"/>
+
+  <!-- Publish all the robot frames. -->
+  <node name="robot_state_publisher"
+	pkg="robot_state_publisher"
+  	type="robot_state_publisher"/>
+
+  <!-- Run wheel control and sensor processes -->
+	<node pkg="me169"
+	type="wheelcontrol.py" 
+	name="wheel_control" 
+	output="screen"/>
+	
+	<node pkg="me169" 
+	type="odometry.py" 
+	name="odometry"
+	output="screen"/>
+	
+	<!-- Start the RealSense. This is *not* enabling the pointcloud -->
+	  <!-- and running the depth/color at 15Hz to lower the load.     -->
+	  <!-- The default image settings are: -->
+	  <!--   Depth  848 x 480 @ 30Hz       -->
+	  <!--   Color  640 x 480 @ 30Hz       -->
+	  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+		<arg name="depth_width"       value="848"/>
+		<arg name="depth_height"      value="480"/>
+		<arg name="depth_fps"         value="15"/>
+
+		<arg name="color_width"       value="640"/>
+		<arg name="color_height"      value="480"/>
+		<arg name="color_fps"         value="15"/>
+
+		<arg name="enable_pointcloud"        value="false"/>
+		<arg name="allow_no_texture_points"  value="true"/>
+
+		<!-- Replace RS2_STREAM_COLOR with RS_STREAM_ANY to -->
+		<!-- create the pointcloud without the RGB colors.  -->
+		<arg name="pointcloud_texture_stream" default="RS2_STREAM_COLOR"/>
+	  </include>
+
+	  <!-- Start the depth image to laser scan conversion. -->
+	  <node name="depthtolaserscan"
+		pkg ="depthtolaserscan"
+		type="depthtolaserscan"
+		output="screen">
+		<param name="min_height"  value="0.030"/>
+		<param name="max_height"  value="0.250"/>
+		<param name="correction"  value="0.000056"/>
+		<param name="horzsamples" value="-1"/>   <!-- -1 = imagewidth/2  = 424 -->
+		<param name="vertsamples" value="-1"/>   <!-- -1 = imageheight/2 = 240 -->
+		<param name="minimum_contacts" value="5"/>
+		<param name="similar_fraction" value="0.03"/>
+	  </node>
+</launch>

@@ -1,0 +1,8 @@
+prefix=/home/atlas/robotws/devel
+
+Name: me169
+Description: Description of me169
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -7,7 +7,4 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/atlas/robotws/devel:$CMAKE_PREFIX_PATH"
 export PWD='/home/atlas/robotws/build'
-export ROSLISP_PACKAGE_DIRECTORIES='/home/atlas/robotws/devel/share/common-lisp'
-export ROS_PACKAGE_PATH="/home/atlas/robotws/src:$ROS_PACKAGE_PATH"

@@ -1,0 +1,8 @@
+prefix=/home/atlas/robotws/install
+
+Name: me169_shared
+Description: Description of me169_shared
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

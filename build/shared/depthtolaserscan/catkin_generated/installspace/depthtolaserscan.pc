@@ -1,0 +1,8 @@
+prefix=/home/atlas/robotws/install
+
+Name: depthtolaserscan
+Description: Description of depthtolaserscan
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

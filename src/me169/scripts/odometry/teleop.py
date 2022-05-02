@@ -71,7 +71,7 @@ def loop(screen):
 
             # Reset the active time.
             key     = keycode
-            Tactive = 0.5
+            Tactive = 0.1
 
             # Change the velocity based on the key.
             if not ((keycode >= 0) and (keycode < 0x80)):

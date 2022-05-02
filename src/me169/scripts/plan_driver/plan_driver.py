@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 #
-#   simpledriver.py
+#   plan_driver.py
 #
 #   Converts current position and desired position into velocity/twist
 #
-#   Node:       /driver
+#   Node:       /plan_driver
 #   Publish:    /vel_cmd          geometry_msgs/Twist
 #   Subscribe:  /odom                   Odometry
 #               /move_base_simple/goal  geometry_msgs/PoseStamped
+#               /scan                   sensor_msgs/LaserScan
 #
 import math
 import rospy
 
-from geometry_msgs.msg import Point, Quaternion, Twist
-from geometry_msgs.msg import PoseStamped
-from nav_msgs.msg      import Odometry
+from geometry_msgs.msg  import Point, Quaternion, Twist
+from geometry_msgs.msg  import PoseStamped
+from nav_msgs.msg       import Odometry
+from sensor_msgs.msg    import LaserScan
 
 
 #
@@ -27,7 +29,7 @@ class DriverObj():
     OMEGA_P_CONST_DRIVE = 0.8 # 1/s
     OMEGA_I_CONST = 0.001
     VEL_P_CONST = 0.5 # 1/s
-    MAX_VEL = 0.25 # m/s
+    MAX_VEL = 0.75 # m/s
 
     VEL_TIME_CONST = 2.0 # m/s
     OMEGA_CONST = 0.9
@@ -59,6 +61,9 @@ class DriverObj():
         # Create a subscriber to listen to pose commands
         rospy.Subscriber('/move_base_simple/goal', PoseStamped, self.cb_update_desired)
 
+        # Create subscriber to listen to laser scan
+        rospy.Subscriber('/scan', LaserScan, self.cb_update_scan)
+
     ## GOTO function options
     # new version of lame goto that uses p control on orientation and velocity
     def lameGoto2(self):
@@ -83,8 +88,6 @@ class DriverObj():
             else:
                 self.simple_err += relt
                 wz = self.OMEGA_P_CONST_SPIN * relt + self.OMEGA_I_CONST*self.simple_err
-                print(relt)
-                print(self.simple_err)
 
         else:
             # MODE: TURN TO FACE TARGET AND MOVE
@@ -123,16 +126,19 @@ class DriverObj():
         dy = self.des_y - self.cur_y
         d = math.sqrt(dx*dx + dy*dy)
         targett = math.atan2(dy, dx)
+        relt = angleDiff(self.des_t, self.cur_t)
 
         # relt = angleDiff(self.des_t, self.cur_t)
-        vx = (1/self.VEL_TIME_CONST/2)*d*math.cos(targett - self.cur_t)
+        vx = clamp((1/self.VEL_TIME_CONST)*d*math.cos(targett - self.cur_t), -self.MAX_VEL, self.MAX_VEL)
         wz = self.OMEGA_CONST*math.sin(targett - self.cur_t)
 
         if (d < self.CLOSE_ENOUGH_DISTANCE):
             vx = 0
+            self.simple_err += relt
+            wz = self.OMEGA_P_CONST_SPIN * relt + self.OMEGA_I_CONST*self.simple_err
 
-        relt = angleDiff(self.des_t, self.cur_t)
         if (abs(relt) < self.CLOSE_ENOUGH_THETA):
+            self.simple_err = 0
             wz = 0
 
         # save message
@@ -165,8 +171,9 @@ class DriverObj():
         qw = msg.pose.pose.orientation.w
         self.cur_t = 2*math.atan2(qz, qw)
 
-        # msg_velcmd = self.lameGoto2()
-        msg_velcmd = self.easyGoto()
+        msg_velcmd = self.lameGoto2()
+        # msg_velcmd = self.easyGoto()
+        # msg_velcmd = self.carGoto()
         self.pub_velcmd.publish(msg_velcmd)
 
 # Compute the angle difference
@@ -184,7 +191,7 @@ def clamp(x, min_x, max_x):
 #
 if __name__ == "__main__":
     # Initialize the ROS node.
-    rospy.init_node('driver')
+    rospy.init_node('plan_driver')
 
     # Instantiate the Driver object
     simpledriver = DriverObj()
