@@ -23,17 +23,18 @@ from sensor_msgs.msg    import LaserScan
 #   Simple Driver
 #
 class DriverObj():
+    # Constants for goto function
     CLOSE_ENOUGH_DISTANCE = 0.02 # m
     CLOSE_ENOUGH_THETA = 0.2 # rad
     OMEGA_P_CONST_SPIN = 1.5
-    OMEGA_P_CONST_DRIVE = 0.8 # 1/s
     OMEGA_I_CONST = 0.001
-    VEL_P_CONST = 0.5 # 1/s
     MAX_VEL = 0.75 # m/s
-
     VEL_TIME_CONST = 2.0 # m/s
     OMEGA_CONST = 0.9
 
+    # constants for scannin'
+    ESTOP_OFFSET_MULT = 3.0 # 1/s(DANGER ZONE)
+    ESTOP_OFFSET_MIN = 0.2 # m
 
     def __init__(self):
         ## define class variables
@@ -64,63 +65,8 @@ class DriverObj():
         # Create subscriber to listen to laser scan
         rospy.Subscriber('/scan', LaserScan, self.cb_update_scan)
 
-    ## GOTO function options
-    # new version of lame goto that uses p control on orientation and velocity
-    def lameGoto2(self):
-        # distance to travel
-        dx = self.des_x - self.cur_x
-        dy = self.des_y - self.cur_y
-        d = math.sqrt(dx*dx + dy*dy)
-
-        if (d < self.CLOSE_ENOUGH_DISTANCE):
-            # MODE: TARGET POSITION REACHED, TURN TO FACE GOAL
-            # # compute relative angle to travel (q_des q_cur*)
-            # relqw = self.des_qw*self.cur_qw + self.des_qz*self.cur_qz   # sin(relt/2)
-            # relqz = self.des_qz*self.cur_qw - self.des_qw*self.cur_qz   # cos(relt/2)
-            # relt = 2*math.atan2(relqz, relqw)
-            relt = angleDiff(self.des_t, self.cur_t)
-
-            # travel!
-            vx = 0
-            if (abs(relt) < self.CLOSE_ENOUGH_THETA):
-                self.simple_err = 0
-                wz = 0
-            else:
-                self.simple_err += relt
-                wz = self.OMEGA_P_CONST_SPIN * relt + self.OMEGA_I_CONST*self.simple_err
-
-        else:
-            # MODE: TURN TO FACE TARGET AND MOVE
-            # compute relative angle of target
-            targett = math.atan2(dy, dx)
-            # tqw = math.cos(targett/2)
-            # tqz = math.sin(targett/2)
-            # relqw = tqw*self.cur_qw + tqz*self.cur_qz   # sin(relt/2)
-            # relqz = tqz*self.cur_qw - tqw*self.cur_qz   # cos(relt/2)
-            # relt = 2*math.atan2(relqz, relqw)
-            relt = angleDiff(targett, self.cur_t)
-
-            if (relt < self.CLOSE_ENOUGH_THETA):
-                vx = min(self.VEL_P_CONST * d, self.MAX_VEL)
-            else:
-                vx = 0
-
-            # travel!
-            # vx = min(self.VEL_P_CONST * d, self.MAX_VEL)
-            wz = self.OMEGA_P_CONST_DRIVE*relt
-
-        # save message
-        msg = Twist()
-        msg.linear.x = vx
-        msg.linear.y = 0.0
-        msg.linear.z = 0.0
-        msg.angular.x = 0.0
-        msg.angular.y = 0.0
-        msg.angular.z = wz
-        return msg
-
     # car driver protocol
-    def easyGoto(self):
+    def gotoPoint(self):
         # distance to travel
         dx = self.des_x - self.cur_x
         dy = self.des_y - self.cur_y
@@ -152,7 +98,8 @@ class DriverObj():
         return msg
 
 
-    # Callback for /move_base_simple/goal, saves x, y, theta desired to class
+    '''CALLBACK FUNCTIONS'''
+    # Callback for /move_base_simple/goal
     def cb_update_desired(self, msg):
         # Update desired x, y, theta, sin/cos
         self.des_x = msg.pose.position.x
@@ -162,7 +109,7 @@ class DriverObj():
         self.des_t = 2*math.atan2(qz, qw)
 
 
-    # Callback for /odom, saves x, y, and theta current to class
+    # Callback for /odom
     def cb_update_current(self, msg):
         # Update current x, y, theta, sin/cos
         self.cur_x = msg.pose.pose.position.x
@@ -171,10 +118,32 @@ class DriverObj():
         qw = msg.pose.pose.orientation.w
         self.cur_t = 2*math.atan2(qz, qw)
 
-        msg_velcmd = self.lameGoto2()
-        # msg_velcmd = self.easyGoto()
-        # msg_velcmd = self.carGoto()
+        msg_velcmd = self.gotoPoint()
         self.pub_velcmd.publish(msg_velcmd)
+
+    # Callback for /scan
+    def cb_update_scan(self, msg):
+        # stop if something is right in front
+        range_min = msg.range_min
+        range_max = msg.range_max
+
+        if (self.vx < 0):
+            # can't see anything!
+            return
+        
+        offset = max(self.ESTOP_OFFSET_MULT*self.vx, self.ESTOP_OFFSET_MIN)
+
+        for r in msg.ranges:
+            # throw out anything outside of the range
+            if (r < range_min) or (r > range_max):
+                continue
+            if (r < (range_min + offset)):
+                self.vx = 0
+                self.des_x = self.cur_x
+                self.des_y = self.cur_y
+                self.des_t = self.cur_t
+                break
+
 
 # Compute the angle difference
 def angleDiff(t1, t2):
