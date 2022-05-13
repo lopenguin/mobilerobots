@@ -6,11 +6,18 @@
   <arg name="model" default="$(find bot_description)/urdf/$(arg urdf)"/>
 
   <!-- Rviz configuration file parameter. -->
-  <arg name="cfg"   default="$(find me169)/rviz/laserscan.rviz"/>
-
+  <arg name="cfg"   default="$(find me169)/rviz/localization.rviz"/>
 
   <!-- Load the URDF file into the robot_description parameter. -->
   <param name="robot_description" textfile="$(arg model)"/>
+
+  <!-- Map Yaml File. -->
+  <arg name="map" default="$(find me169)/maps/keck308corner.yaml"/>
+  <!-- Start the map server -->
+  <node name="map_server"
+  		pkg ="map_server"
+  		type="map_server"
+  		args="$(arg map)"/>
 
   <!-- Publish all the robot frames. -->
   <node name="robot_state_publisher"
@@ -27,6 +34,12 @@
 	type="odometry.py" 
 	name="odometry"
 	output="screen"/>
+
+	<!-- Run plan_driver process -->
+	<node pkg="me169" 
+	type="astar_driver.py" 
+	name="astar_driver"
+	output="screen"/>
 	
 	<!-- Start the RealSense. This is *not* enabling the pointcloud -->
 	  <!-- and running the depth/color at 15Hz to lower the load.     -->
@@ -38,6 +51,7 @@
 		<arg name="depth_height"      value="480"/>
 		<arg name="depth_fps"         value="15"/>
 
+		<arg name="enable_color"             value="false"/>
 		<arg name="color_width"       value="640"/>
 		<arg name="color_height"      value="480"/>
 		<arg name="color_fps"         value="15"/>
@@ -47,7 +61,9 @@
 
 		<!-- Replace RS2_STREAM_COLOR with RS_STREAM_ANY to -->
 		<!-- create the pointcloud without the RGB colors.  -->
-		<arg name="pointcloud_texture_stream" default="RS2_STREAM_COLOR"/>
+		<arg name="pointcloud_texture_stream" default="RS2_STREAM_ANY"/>
+
+		<!-- Turn off everything else -->
 	  </include>
 
 	  <!-- Start the depth image to laser scan conversion. -->
@@ -57,7 +73,9 @@
 		output="screen">
 		<param name="min_height"  value="0.030"/>
 		<param name="max_height"  value="0.250"/>
-		<param name="correction"  value="0.000056"/>
+		<!-- <param name="correction"  value="0.000056"/> -->
+		<param name="correction"  value="0.0"/>
+		<param name="correction"  value="0.0"/>
 		<param name="horzsamples" value="-1"/>   <!-- -1 = imagewidth/2  = 424 -->
 		<param name="vertsamples" value="-1"/>   <!-- -1 = imageheight/2 = 240 -->
 		<param name="minimum_contacts" value="5"/>
@@ -74,4 +92,12 @@
 	args="-d $(arg cfg)"
 	output="screen"
 	required="true"/>
+
+
+
+	<!-- Run localization process -->
+	<node pkg="me169" 
+	type="localization.py" 
+	name="localization"
+	output="screen"/>
 </launch>

@@ -26,4 +26,15 @@
 	args="-d $(arg cfg)"
 	output="screen"
 	required="true"/>
+
+
+  <node pkg="me169"
+	type="wheelcontrol.py" 
+	name="wheel_control" 
+	output="screen"/>
+	
+	<node pkg="me169" 
+	type="odometry.py" 
+	name="odometry"
+	output="screen"/>
 </launch>
