@@ -58,7 +58,6 @@ class LocalizationObj():
         self.mapmsg = rospy.wait_for_message('/map', OccupancyGrid, 30.0)
 
         # compute and save the wall proximity array
-        startTime = rospy.Time.now()
         print("Starting preprocessing.")
         self.walls_near = map_to_nearest_wall(self.mapmsg)
 
@@ -100,7 +99,7 @@ class LocalizationObj():
         rowIdx = -1
 
         # iterate through all points in current scan view
-        for i in range(numRanges):
+        for i in range(0,numRanges,10):
             # Get the reported range
             rng = msg.ranges[i]
             # throw out any obvious garbage

@@ -36,10 +36,10 @@
 	output="screen"/>
 
 	<!-- Run plan_driver process -->
-	<node pkg="me169" 
+	<!-- <node pkg="me169" 
 	type="astar_driver.py" 
 	name="astar_driver"
-	output="screen"/>
+	output="screen"/> -->
 	
 	<!-- Start the RealSense. This is *not* enabling the pointcloud -->
 	  <!-- and running the depth/color at 15Hz to lower the load.     -->

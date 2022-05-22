@@ -12,11 +12,14 @@
 #
 import math
 import rospy
-from State import State
+import numpy as np
+from State import State, Node, cartesiantopixel, pixeltocartesian, growWalls
 
 from geometry_msgs.msg  import Point, Quaternion, Twist
 from geometry_msgs.msg  import PoseStamped
 from sensor_msgs.msg    import LaserScan
+from nav_msgs.msg import OccupancyGrid
+from visualization_msgs.msg import Marker
 
 
 #
@@ -31,13 +34,29 @@ class DriverObj():
         # current
         self.cur_state = State.Empty()
         # desired
-        self.des_states = [State.Empty()]
+        self.des_states = [State.Empty(), State(1.0, 1.0, 0.0)]
 
         self.stopped = False
 
         ## initalize node
+        # Wait 30 seconds for a map at startup
+        rospy.loginfo("Waiting for a map...")
+        self.mapmsg = rospy.wait_for_message('/map', OccupancyGrid, 30.0)
+
+        # copy the map probabilities into a new array
+        width = self.mapmsg.info.width # Map width [cells]
+        height = self.mapmsg.info.height # Map height [cells]
+        mapdata = self.mapmsg.data #Map data, in row-major order, starting with (0,0). Occupancy probabilities [0,100]. Unknown is -1.
+        self.mapgrid = np.reshape(mapdata,[height,width]) # Map data in 2D array format (Top down)
+        self.mapgrid = self.mapgrid.T # Transpose into [width, height]
+
+        self.mapgrid = growWalls(self.mapgrid, 8)
+
         # Create a publisher to send velocity commands.
         self.pub_velcmd = rospy.Publisher('/vel_cmd', Twist, queue_size=10)
+
+        # Create a publisher to send markers
+        self.pub_marker = rospy.Publisher('/waypoints', Marker, queue_size=10)
 
         # Create a subscriber to listen to pose commands.
         rospy.Subscriber('/pose', PoseStamped, self.cb_update_current)
@@ -59,8 +78,14 @@ class DriverObj():
     CLOSE_ENOUGH_THETA = 0.5
 
     def gotoPoint2(self):
-        if (len(self.des_states) == 0):
+        nwaypoints = len(self.des_states)
+        if (nwaypoints == 0):
             return
+            
+        if (nwaypoints > 1):
+            # consider skipping to the next waypoint
+            if (self.cur_state.dist(self.des_states[0]) < 0.5):
+                self.des_states.pop(0)
 
         des_state = self.des_states[0]
         des_x = des_state.x
@@ -96,10 +121,38 @@ class DriverObj():
     # Callback for /move_base_simple/goal
     def cb_update_desired(self, msg):
         assert (msg.header.frame_id == 'map'), "Message not in map frame"
+        new_des = State.FromPose(msg.pose)
         # Clear the waypoint queue
         self.des_states.clear()
-        self.des_states.append(State.FromPose(msg.pose))
+        # self.des_states.append(State.FromPose(msg.pose))
 
+        # run A* to get to the desired.
+        path = self.astar(new_des)
+        if path:
+            # add the desired goal to the very end
+            self.des_states.append(new_des)
+        
+
+        # plot the marker
+        markermsg = Marker()
+        markermsg.header.frame_id = "map"
+        markermsg.header.stamp = rospy.Time.now()
+        markermsg.ns = "waypoints"
+        markermsg.id = 0
+        markermsg.type = Marker.POINTS
+        markermsg.action = Marker.ADD
+        markermsg.color.r = 1.0
+        markermsg.color.g = 1.0
+        markermsg.color.a = 1.0
+        markermsg.scale.x = 0.05
+        markermsg.scale.y = 0.05
+        markermsg.points = []
+        for pt in self.des_states:
+            markermsg.points.append(Point(pt.x, pt.y, 0.0))
+
+        self.pub_marker.publish(markermsg)
+
+        # get moving!
         self.stopped = False
 
 
@@ -147,6 +200,79 @@ class DriverObj():
                 self.vx = 0
                 # self.wz = 0
                 break
+
+
+    # A* function
+    def astar(self, des):
+        # copy the map
+        astarmap = self.mapgrid.copy()
+        [xmax, ymax] = astarmap.shape
+
+        # define the key markers in the map
+        WALL = 100
+        PROCESSED = -1  # also eliminates regions outside the map
+        ONDECK = -2
+
+        # convert states to grid coorodinates
+        (xs, ys) = cartesiantopixel(self.mapmsg, self.cur_state.x, self.cur_state.y)
+        (xg, yg) = cartesiantopixel(self.mapmsg, des.x, des.y)
+
+        # create the queue and visited lists
+        queue = []
+        visited = []
+
+        # start at the start
+        current = Node(xs, ys, None, 0.0)
+
+        itnum = 0
+        while (current.x != xg) or (current.y != yg):
+            print(itnum)
+            itnum+=1
+            ## Add all neighbors
+            incs_to_check = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
+            for i in incs_to_check:
+                # get the new coordinates
+                c = [current.x + i[0], current.y + i[1]]
+                # make sure we are still in the map
+                if (c[0] >= 0) or \
+                   (c[0] <= xmax) or \
+                   (c[1] >= 0) or \
+                   (c[1] <= ymax):
+
+                    # we are good to add! Check if new node has a wall
+                    val = astarmap[c[0], c[1]]
+                    if (val != WALL) and (val != PROCESSED) and (val != ONDECK):
+                        # add the new cost as Euclidian distance
+                        newcost = current.cost + math.sqrt(i[0]*i[0] + i[1]*i[1])
+                        queue.append(Node(c[0], c[1], current, newcost))
+                        astarmap[c[0], c[1]] = ONDECK
+
+            
+            # all possible neighbors have been added.
+            # if the queue is empty, there is no path
+            if (len(queue) == 0):
+                rospy.loginfo("No path found. Staying put.")
+                return False
+
+            # close out current node
+            astarmap[current.x, current.y] = PROCESSED
+            visited.append(current)
+
+            # sort the queue by cost + predicted cost-to-go (Euler)
+            queue.sort(key=lambda s: (s.cost + s.xydist(xg, yg)))
+
+            # pull out lowest cost
+            current = queue.pop(0)
+
+        # Goal reached! Trace backwards to find path
+        n = current
+        while (n.x != xs or n.y != ys):
+            (cx, cy) = pixeltocartesian(self.mapmsg, n.x, n.y)
+            self.des_states.insert(0, State(cx, cy, 0.0))
+            n = n.prev
+
+        return True
+
 
 
 # Compute the angle difference

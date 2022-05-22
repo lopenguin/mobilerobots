@@ -126,7 +126,6 @@ def cartesiantopixel(mapmsg,xm,ym):
 
     return (u, v)
 
-
 if __name__  == "__main__":
     # Initialize the ROS node.
     rospy.init_node('maputilities')

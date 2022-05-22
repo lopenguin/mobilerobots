@@ -131,10 +131,10 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/atlas/robotws/build/gtest/cmake_install.cmake")
+  include("/home/atlas/robotws/build/rplidar_ros/cmake_install.cmake")
   include("/home/atlas/robotws/build/shared/depthtolaserscan/cmake_install.cmake")
   include("/home/atlas/robotws/build/shared/bot_description/cmake_install.cmake")
   include("/home/atlas/robotws/build/me169/cmake_install.cmake")
-  include("/home/atlas/robotws/build/shared/shared_me169/cmake_install.cmake")
 
 endif()
 

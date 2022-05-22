@@ -6,7 +6,7 @@
   <arg name="model" default="$(find bot_description)/urdf/$(arg urdf)"/>
 
   <!-- Rviz configuration file parameter. -->
-  <arg name="cfg"   default="$(find me169)/rviz/odometry.rviz"/>
+  <arg name="cfg"   default="$(find me169)/rviz/odometrylidar.rviz"/>
 
 
   <!-- Load the URDF file into the robot_description parameter. -->
@@ -26,6 +26,17 @@
 	args="-d $(arg cfg)"
 	output="screen"
 	required="true"/>
+
+
+  <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
+  <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>
+  <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
+  <!--param name="serial_baudrate"     type="int"    value="256000"--><!--A3 -->
+  <param name="frame_id"            type="string" value="laser"/>
+  <param name="inverted"            type="bool"   value="false"/>
+  <param name="angle_compensate"    type="bool"   value="true"/>
+  </node>
+
 
 
   <node pkg="me169"
