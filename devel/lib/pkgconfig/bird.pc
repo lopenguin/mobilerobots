@@ -1,0 +1,8 @@
+prefix=/home/atlas/robotws/devel
+
+Name: bird
+Description: Description of bird
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

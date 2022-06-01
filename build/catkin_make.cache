@@ -1,2 +1,2 @@
-me169:rplidar_ros:shared/bot_description:shared/depthtolaserscan
+bird:me169:rplidar_ros:shared/bot_description:shared/depthtolaserscan
 -DCATKIN_DEVEL_PREFIX=/home/atlas/robotws/devel -DCMAKE_INSTALL_PREFIX=/home/atlas/robotws/install -G Unix Makefiles

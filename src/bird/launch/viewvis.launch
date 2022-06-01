@@ -1,0 +1,29 @@
+<launch>
+  <!-- Test the odometry node (and lower levels). -->
+
+  <!-- URDF parameter. -->
+  <arg name="urdf"  default="bot.urdf"/>
+  <arg name="model" default="$(find bot_description)/urdf/$(arg urdf)"/>
+
+  <!-- Rviz configuration file parameter. -->
+  <arg name="cfg"   default="$(find me169)/rviz/odometry.rviz"/>
+
+
+  <!-- Load the URDF file into the robot_description parameter. -->
+  <param name="robot_description" textfile="$(arg model)"/>
+
+
+  <!-- Publish all the robot frames. -->
+  <node name="robot_state_publisher"
+	pkg="robot_state_publisher"
+  	type="robot_state_publisher"/>
+
+  <!-- Run the rviz visualization, with the specified config file -->
+  <!-- Kill everything if this stops. -->
+  <node pkg="rviz"
+  	type="rviz"
+	name="rviz"
+	args="-d $(arg cfg)"
+	output="screen"
+	required="true"/>
+</launch>

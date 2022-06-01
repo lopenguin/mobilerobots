@@ -386,6 +386,12 @@ actionlib_DIR:PATH=/opt/ros/noetic/share/actionlib/cmake
 actionlib_msgs_DIR:PATH=/opt/ros/noetic/share/actionlib_msgs/cmake
 
 //Value Computed by CMake
+bird_BINARY_DIR:STATIC=/home/atlas/robotws/build/bird
+
+//Value Computed by CMake
+bird_SOURCE_DIR:STATIC=/home/atlas/robotws/src/bird
+
+//Value Computed by CMake
 bot_description_BINARY_DIR:STATIC=/home/atlas/robotws/build/shared/bot_description
 
 //Value Computed by CMake
@@ -423,6 +429,9 @@ gennodejs_DIR:PATH=/opt/ros/noetic/share/gennodejs/cmake
 
 //The directory containing a CMake configuration file for genpy.
 genpy_DIR:PATH=/opt/ros/noetic/share/genpy/cmake
+
+//The directory containing a CMake configuration file for geometery_msgs.
+geometery_msgs_DIR:PATH=geometery_msgs_DIR-NOTFOUND
 
 //The directory containing a CMake configuration file for geometry_msgs.
 geometry_msgs_DIR:PATH=/opt/ros/noetic/share/geometry_msgs/cmake
@@ -753,7 +762,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=9
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

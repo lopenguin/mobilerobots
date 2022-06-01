@@ -7,5 +7,6 @@
 subdirs("gtest")
 subdirs("rplidar_ros")
 subdirs("shared/depthtolaserscan")
+subdirs("bird")
 subdirs("shared/bot_description")
 subdirs("me169")
