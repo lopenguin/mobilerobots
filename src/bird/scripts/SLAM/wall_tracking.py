@@ -49,7 +49,7 @@ class WallTracker():
 
         # Update the map with new measurements
         self.updateMap(measurementWalls)
-        self.viz.drawWalls(self.map, "odom")
+        self.viz.drawWalls(self.map, msg.header.frame_id)
 
     def elideMap(self):
         walls = self.map

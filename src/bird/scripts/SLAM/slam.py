@@ -93,7 +93,7 @@ class SLAM():
         # startTime = rospy.Time.now()
 
         # convert into (x, y) map frame points
-        tfmsg = self.tf2_buf.lookup_transform('odom', 'base', msg.header.stamp, rospy.Duration(0.1))
+        tfmsg = self.tf2_buf.lookup_transform('odom', msg.header.frame_id, msg.header.stamp, rospy.Duration(0.1))
         TF_mapToBase = PlanarTransform.fromTransform(tfmsg.transform)
 
         pts = pc2.read_points(msg)
@@ -168,13 +168,13 @@ class SLAM():
 
         self.walls = instWalls
         # # draw the lines when we are done
-        self.viz.drawInstantaneousWalls(instWalls, "odom")
+        self.viz.drawInstantaneousWalls(instWalls, 'odom')
 
-        self.pub_walls.publish(self.wallsToPolygon(msg.header.stamp))
+        self.pub_walls.publish(self.wallsToPolygon(msg.header.stamp, 'odom'))
+        
+        self.pub_mapToOdom.sendTransform(self.TF_mapToOdom.toTransformStamped('map', 'odom', msg.header.stamp))
 
         # print((rospy.Time.now() - startTime).to_sec())
-
-        self.pub_mapToOdom.sendTransform(self.TF_mapToOdom.toTransformStamped('map', 'odom', rospy.Time.now()))
 
         # Update the map
         # self.startime = rospy.Time.now()
@@ -183,7 +183,7 @@ class SLAM():
         # # Draw the map
         # self.viz.drawInstantaneousWalls(self.walls, "odom")
 
-    def wallsToPolygon(self, time):
+    def wallsToPolygon(self, time, frame):
         points = []
         for wall in self.walls:
             pt1 = wall.p1.toPointMsg()
@@ -196,6 +196,7 @@ class SLAM():
         
         msg = PolygonStamped()
         msg.header.stamp = time
+        msg.header.frame_id = frame
         msg.polygon.points = points
         return msg
 

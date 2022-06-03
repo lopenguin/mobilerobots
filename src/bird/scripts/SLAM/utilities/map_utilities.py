@@ -54,6 +54,36 @@ class PlanarPoint:
         return Pose(Point(self.x, self.y, 0.0),
                     Quaternion(0.0, 0.0, 0, 0))
 
+
+    # convert point into polar coordinates centered around the robot's position
+    def toPolar(self, TF_odomToMap):
+        # convert coordinates into odom frame
+        (xOdom, yOdom) = TF_odomToMap.inParent(self.x, self.y)
+        r = math.sqrt(xOdom*xOdom + yOdom*yOdom)
+        theta = math.atan2(yOdom, xOdom)
+        return PolarPoint(r, theta, self.time)
+
+    def __repr__(self):
+        return "(" + str(round(self.x,4)) + ", " + str(round(self.y,4)) + ")"
+
+
+class PolarPoint():
+    def __init__(self, r, theta, time):
+        self.r = r
+        self.t = theta
+        self.time = time
+
+    def toCartesian(self, TF_mapToOdom):
+        # convert to carteisan
+        xOdom = self.r*math.cos(self.t)
+        yOdom = self.r*math.sin(self.t)
+        # convert to map frame
+        (x, y) = TF_mapToOdom.inParent(xOdom, yOdom)
+        return PlanarPoint(x, y, self.time)
+
+    def __repr__(self):
+        return "(r=" + str(round(self.r,4)) + ", t=" + str(round(self.t,4)) + ")"
+
 class Line:
     def __init__(self, p1, p2, confidence):
         self.p1 = p1
@@ -80,7 +110,65 @@ class Line:
         self.intercept = self.p1.y - self.slope*self.p1.x
         self.length = self.p1.dist(self.p2)
 
+    def toPolar(self, TF_odomToMap):
+        return PolarLine(self.p1.toPolar(TF_odomToMap), self.p2.toPolar(TF_odomToMap), self)
 
+    def __repr__(self):
+        return str(self.p1) + ", " + str(self.p2)
+
+class PolarLine():
+    def __init__(self, p1, p2, line):
+        if (p1.t < p2.t):
+            self.p1 = p1
+            self.p2 = p2
+        else:
+            self.p1 = p2
+            self.p2 = p1
+        self.line = line
+
+        if abs(p1.t - p2.t) > math.pi:
+            self.wrapped = True
+        else:
+            self.wrapped = False
+
+    def rAtTheta(self, theta):
+        # r = b /(sin t - m cos t)
+        return self.line.intercept / (math.sin(theta) - self.line.slope * math.cos(theta))
+
+    def radialDist(self, pt):
+        rAtPt = self.rAtTheta(pt.t)
+        return pt.r - rAtPt
+
+    # assumes theta between -pi and pi
+    def inThetaRange(self, testTheta):
+        if not self.wrapped:
+            if (testTheta >= self.p1.t) and (testTheta <= self.p2.t):
+                return True
+            else:
+                return False
+        else:
+            if (testTheta <= self.p1.t) or (testTheta >= self.p2.t):
+                return True
+            else:
+                return False
+
+    def occludedBy(self, other):
+        if (other.inThetaRange(self.p1.t) and other.inThetaRange(self.p2.t)):
+            return True
+        else:
+            return False
+
+    def overlaps(self, o):
+        if (self.inThetaRange(o.p1.t) or self.inThetaRange(o.p2.t)):
+            return True
+        else:
+            return False
+
+    def toCartesian(self, TF_mapToOdom):
+        return Line(self.p1.toCartesian(TF_mapToOdom), self.p2.toCartesian(TF_mapToOdom), self.line.confidence)
+
+    def __repr__(self):
+        return str(self.p1) + ", " + str(self.p2)
 
 """
 Generate a list of points in map space of the laser scan results
