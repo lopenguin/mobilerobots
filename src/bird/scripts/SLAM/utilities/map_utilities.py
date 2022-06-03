@@ -135,6 +135,7 @@ class PolarLine():
         # r = b /(sin t - m cos t)
         return self.line.intercept / (math.sin(theta) - self.line.slope * math.cos(theta))
 
+    # Point in front = negative, behind = positive
     def radialDist(self, pt):
         rAtPt = self.rAtTheta(pt.t)
         return pt.r - rAtPt
@@ -152,14 +153,16 @@ class PolarLine():
             else:
                 return False
 
+    # BAD! Do not use
     def occludedBy(self, other):
-        if (other.inThetaRange(self.p1.t) and other.inThetaRange(self.p2.t)):
-            return True
+        if (self.inThetaRange(other.p1.t) and self.inThetaRange(other.p2.t)):
+            return self.p1.r < other.p1.r
         else:
             return False
 
     def overlaps(self, o):
-        if (self.inThetaRange(o.p1.t) or self.inThetaRange(o.p2.t)):
+        if (self.inThetaRange(o.p1.t) or self.inThetaRange(o.p2.t)) or \
+           (o.inThetaRange(self.p1.t) or o.inThetaRange(self.p2.t)):
             return True
         else:
             return False

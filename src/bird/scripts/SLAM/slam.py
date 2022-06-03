@@ -90,7 +90,7 @@ class SLAM():
 
     # /scan callback (sensor_msgs/PointCloud2)
     def cb_scan(self, msg):
-        # startTime = rospy.Time.now()
+        startTime = rospy.Time.now()
 
         # convert into (x, y) map frame points
         tfmsg = self.tf2_buf.lookup_transform('odom', msg.header.frame_id, msg.header.stamp, rospy.Duration(0.1))
@@ -122,7 +122,7 @@ class SLAM():
         currEnd = 0
         lastLineVals = (0.0, 0.0, 0.0, 0, 0)
 
-        for i in range(scan.shape[0]):
+        for i in range(0,scan.shape[0],2):
             if (i == currStart):
                 # want at least two points
                 continue
@@ -174,7 +174,7 @@ class SLAM():
         
         self.pub_mapToOdom.sendTransform(self.TF_mapToOdom.toTransformStamped('map', 'odom', msg.header.stamp))
 
-        # print((rospy.Time.now() - startTime).to_sec())
+        print((rospy.Time.now() - startTime).to_sec())
 
         # Update the map
         # self.startime = rospy.Time.now()
