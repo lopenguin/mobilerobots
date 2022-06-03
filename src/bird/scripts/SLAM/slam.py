@@ -33,7 +33,7 @@ from geometry_msgs.msg import PoseStamped, PolygonStamped
 from nav_msgs.msg      import Odometry
 
 # constants
-ERROR_THRESHOLD = 0.25
+ERROR_THRESHOLD = 0.15
 ENDPOINT_DISTANCE_THRESHOLD = 0.03
 ADJACENT_DISTANCE_THRESHOLD = 0.04
 
@@ -90,6 +90,7 @@ class SLAM():
 
     # /scan callback (sensor_msgs/PointCloud2)
     def cb_scan(self, msg):
+        self.pub_mapToOdom.sendTransform(self.TF_mapToOdom.toTransformStamped('map', 'odom', msg.header.stamp))
         startTime = rospy.Time.now()
 
         # convert into (x, y) map frame points
@@ -122,7 +123,7 @@ class SLAM():
         currEnd = 0
         lastLineVals = (0.0, 0.0, 0.0, 0, 0)
 
-        for i in range(0,scan.shape[0],2):
+        for i in range(scan.shape[0]):
             if (i == currStart):
                 # want at least two points
                 continue
@@ -172,9 +173,9 @@ class SLAM():
 
         self.pub_walls.publish(self.wallsToPolygon(msg.header.stamp, 'odom'))
         
-        self.pub_mapToOdom.sendTransform(self.TF_mapToOdom.toTransformStamped('map', 'odom', msg.header.stamp))
+        # self.pub_mapToOdom.sendTransform(self.TF_mapToOdom.toTransformStamped('map', 'odom', msg.header.stamp))
 
-        print((rospy.Time.now() - startTime).to_sec())
+        # print((rospy.Time.now() - startTime).to_sec())
 
         # Update the map
         # self.startime = rospy.Time.now()

@@ -55,4 +55,8 @@
 	name="slam"
 	output="screen"/>
 
+	<node pkg="bird" 
+	type="plan.py" 
+	name="plan"
+	output="screen"/>
 </launch>

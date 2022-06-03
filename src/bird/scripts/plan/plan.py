@@ -60,7 +60,7 @@ class Plan():
             
 
     def cb_pose(self, msg):
-        assert (msg.header.frame_id == 'map'), "Message not in map frame"
+        # assert (msg.header.frame_id == 'map'), "Message not in map frame"
         # Update current x, y, theta, sin/cos
         self.cur_state = State.FromPose(msg.pose)
         if (len(self.des_states) == 0):
@@ -95,7 +95,7 @@ class Plan():
             self.pub_velcmd.publish(msg_velcmd)
 
     def cb_desired(self, msg):
-        assert (msg.header.frame_id == 'map'), "Message not in map frame"
+        # assert (msg.header.frame_id == 'map'), "Message not in map frame"
         new_des = State.FromPose(msg.pose)
         # Clear the waypoint queue
         self.des_states.clear()
@@ -103,12 +103,15 @@ class Plan():
 
 
     def cb_scan(self, msg):
+        # ranges = msg.ranges
+        # minTheta = msg.min_angle
+        # maxTheta = msg.max_angle
         pass
 
 
     # constants for gotoPoint2
     DRIVE_TIME_CONSTANT = 5.0
-    MAX_DRIVE_SPEED = 0.5
+    MAX_DRIVE_SPEED = 0.75
     TURNING_TIME_CONSTANT = 2.0
     MAX_TURN_SPEED = 0.5 # rad/s
 
@@ -150,7 +153,7 @@ class Plan():
         else:
             phi = math.atan2(des_y - cur_y, des_x - cur_x)
             theta_diff = angleDiff(phi, cur_t)
-            self.vx = clamp(d*math.cos(theta_diff)/self.DRIVE_TIME_CONSTANT, 0.0 , self.MAX_DRIVE_SPEED)
+            self.vx = clamp(d*math.cos(theta_diff)/self.DRIVE_TIME_CONSTANT, -self.MAX_DRIVE_SPEED , self.MAX_DRIVE_SPEED)
             self.wz = clamp(theta_diff / self.TURNING_TIME_CONSTANT, -self.MAX_TURN_SPEED, self.MAX_TURN_SPEED)
 
 
