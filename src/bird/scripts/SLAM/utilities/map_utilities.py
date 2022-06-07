@@ -92,6 +92,7 @@ class Line:
         self.slope = (self.p2.y - self.p1.y)/(self.p2.x - self.p1.x)
         self.intercept = self.p1.y - self.slope*self.p1.x
         self.length = self.p1.dist(self.p2)
+        self.slopeAngle = math.atan2(p2.y - p1.y, p2.x - p1.x)
 
     @classmethod
     def fromCoord(cls, x1, y1, x2, y2, confidence):
@@ -297,3 +298,6 @@ def LineNearLine(d, lineA, lineB):
     sB = lineB.toTuple()
 
     return SegmentNearSegment(d, sA, sB)
+
+def angleDiff(t1, t2):
+    return (t1-t2) - 2.0*math.pi * round(0.5*(t1-t2)/math.pi)

@@ -153,7 +153,7 @@ class Plan():
         else:
             phi = math.atan2(des_y - cur_y, des_x - cur_x)
             theta_diff = angleDiff(phi, cur_t)
-            self.vx = clamp(d*math.cos(theta_diff)/self.DRIVE_TIME_CONSTANT, -self.MAX_DRIVE_SPEED , self.MAX_DRIVE_SPEED)
+            self.vx = clamp(d*math.cos(theta_diff)/self.DRIVE_TIME_CONSTANT, 0 , self.MAX_DRIVE_SPEED)
             self.wz = clamp(theta_diff / self.TURNING_TIME_CONSTANT, -self.MAX_TURN_SPEED, self.MAX_TURN_SPEED)
 
 
