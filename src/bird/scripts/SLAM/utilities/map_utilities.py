@@ -19,6 +19,10 @@ class PlanarPoint:
         self.y = y
         self.time = time
 
+    def redefine(self, x, y):
+        self.x = x
+        self.y = y
+
     @classmethod
     def fromPolar(cls, r, theta, time):
         return cls(r*math.cos(theta), r*math.sin(theta), time) # TODO: Check this
@@ -67,6 +71,42 @@ class PlanarPoint:
         return "(" + str(round(self.x,4)) + ", " + str(round(self.y,4)) + ")"
 
 
+class PolarSweep():
+    def __init__(self, line, oLine = None):
+        # save the line
+        self.line = line
+        self.originalLine = oLine
+
+        t1 = math.atan2(line.p1.y, line.p1.x)
+        t2 = math.atan2(line.p2.y, line.p2.x)
+
+        # order the points
+        if (t1 > t2):
+            if (t1 - t2 <= math.pi):
+                self.t1 = t2
+                self.t2 = t1
+            else:
+                self.t1 = t1
+                self.t2 = t2
+        else:
+            if (t2 - t1 <= math.pi):
+                self.t1 = t1
+                self.t2 = t2
+            else:
+                self.t1 = t2
+                self.t2 = t1
+
+    def shortenedLine(self, newT1, newT2):
+        r1 = self.rAtTheta(newT1)
+        r2 = self.rAtTheta(newT2)
+        p1 = PlanarPoint(r1*math.cos(newT1), r1*math.sin(newT1), 0)
+        p2 = PlanarPoint(r2*math.cos(newT2), r2*math.sin(newT2), 0)
+        return Line(p1, p2, 1.0)
+
+    def rAtTheta(self, theta):
+        # r = b /(sin t - m cos t)
+        return self.line.intercept / (math.sin(theta) - self.line.slope * math.cos(theta))
+
 class PolarPoint():
     def __init__(self, r, theta, time):
         self.r = r
@@ -103,6 +143,14 @@ class Line:
     def toTuple(self):
         return (self.p1.toTuple(), self.p2.toTuple())
 
+    def vector(self):
+        return np.array([self.p1.x - self.p2.x, self.p1.y - self.p2.y])
+
+    def midpoint(self):
+        xm = (self.p1.x + self.p2.x) / 2
+        ym = (self.p1.y + self.p2.y) / 2
+        return PlanarPoint(xm, ym, self.p1.time)
+
     def redefine(self, p1, p2, confidence):
         self.p1 = p1
         self.p2 = p2
@@ -113,6 +161,10 @@ class Line:
 
     def toPolar(self, TF_odomToMap):
         return PolarLine(self.p1.toPolar(TF_odomToMap), self.p2.toPolar(TF_odomToMap), self)
+
+    def distToPoint(self, p):
+        d = abs((self.p2.x - self.p1.x)*(self.p1.y - p.y) - (self.p1.x - p.x)*(self.p2.y - self.p1.y)) / self.length
+        return d
 
     def __repr__(self):
         return str(self.p1) + ", " + str(self.p2)
@@ -292,6 +344,29 @@ def SegmentNearSegment(d, sA, sB):
 
     # If both crossed, the segments are intersecting.
     return (cross1 and cross2)
+
+
+def SegmentCrossSegment(sA, sB):
+    # Precompute the relative vectors.
+    (ux, uy) = (sA[1][0]-sA[0][0], sA[1][1]-sA[0][1])
+    (vx, vy) = (sB[1][0]-sB[0][0], sB[1][1]-sB[0][1])
+    (rx, ry) = (sB[0][0]-sA[0][0], sB[0][1]-sA[0][1])
+
+    # Precompute the vector cross products.
+    uXv = ux*vy - uy*vx
+    rXu = rx*uy - ry*ux
+    rXv = rx*vy - ry*vx
+
+    # Check the intersection.
+    if (uXv > 0):
+        return ((rXu > 0) and (rXu < uXv) and (rXv > 0) and (rXv < uXv))
+    else:
+        return ((rXu < 0) and (rXu > uXv) and (rXv < 0) and (rXv > uXv))
+
+def LineCrossLine(lineA, lineB):
+    sA = lineA.toTuple()
+    sB = lineB.toTuple()
+    return SegmentCrossSegment(sA, sB)
 
 def LineNearLine(d, lineA, lineB):
     sA = lineA.toTuple()

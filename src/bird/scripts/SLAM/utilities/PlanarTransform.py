@@ -28,6 +28,7 @@
 #     theta = pt.theta()                Compute theta
 #
 import math
+from utilities.map_utilities import Line, PlanarPoint
 
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Vector3
@@ -53,6 +54,14 @@ class PlanarTransform:
     def inParent(self, x, y):
         return (self.px + self.cos() * x - self.sin() * y,
                 self.py + self.sin() * x + self.cos() * y)
+
+    def lineInParent(self, l):
+        p1 = l.p1
+        p2 = l.p2
+        (xp1, yp1) = self.inParent(p1.x, p1.y)
+        (xp2, yp2) = self.inParent(p2.x, p2.y)
+
+        return Line(PlanarPoint(xp1, yp1, p2.time), PlanarPoint(xp2, yp2, p1.time), l.confidence)
 
     def __mul__(self, next):
         (x,y) = self.inParent(next.px, next.py)

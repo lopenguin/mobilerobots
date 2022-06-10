@@ -7,6 +7,7 @@ import rospy
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Point
 from utilities.map_utilities import PlanarPoint
+from std_msgs.msg import ColorRGBA
 
 
 class Visualization:
@@ -68,6 +69,34 @@ class Visualization:
 
         self.pub_marker.publish(markermsg)
 
+    def drawHiddenWalls(self, linelist, frame):
+        # plot the marker
+        markermsg = Marker()
+        markermsg.header.frame_id = frame
+        markermsg.header.stamp = rospy.Time.now()
+        markermsg.ns = "waypoints"
+        markermsg.id = 0
+
+        markermsg.type = Marker.LINE_LIST
+        markermsg.action = Marker.ADD
+
+        markermsg.color.r = 0.58
+        markermsg.color.g = 0.58
+        markermsg.color.b = 0.15
+        markermsg.color.a = 1.0
+
+        markermsg.scale.x = 0.025
+        markermsg.scale.y = 0.025
+
+        markermsg.pose.orientation.w = 1.0
+
+        markermsg.points = []
+        for line in linelist:
+            markermsg.points.append(line.p1.toPointMsg())
+            markermsg.points.append(line.p2.toPointMsg())
+
+        self.pub_marker.publish(markermsg)
+
 
     def drawInstantaneousWalls(self, linelist, frame):
         # plot the marker
@@ -94,6 +123,42 @@ class Visualization:
             markermsg.points.append(line.p1.toPointMsg())
             markermsg.points.append(line.p2.toPointMsg())
 
+        self.pub_marker.publish(markermsg)
+
+    def drawPairs(self, dict, frame):
+        # plot the marker
+        markermsg = Marker()
+        markermsg.header.frame_id = frame
+        markermsg.header.stamp = rospy.Time.now()
+        markermsg.ns = "waypoints"
+        markermsg.id = 0
+
+        markermsg.type = Marker.LINE_LIST
+        markermsg.action = Marker.ADD
+
+        markermsg.colors = []
+
+        markermsg.scale.x = 0.01
+        markermsg.scale.y = 0.01
+
+        markermsg.pose.orientation.w = 1.0
+
+        markermsg.points = []
+        colorList = [ColorRGBA(0, 1, 0, 1), ColorRGBA(0, 1, 1, 1), ColorRGBA(0, 0, 1, 1), ColorRGBA(1, 0, 1, 1)]
+        colorIdx = 0
+        for k in dict.keys():
+            d = dict[k]
+            if (d is not None):
+                markermsg.points.append(k.p1.toPointMsg())
+                markermsg.points.append(k.p2.toPointMsg())
+                markermsg.colors.append(colorList[colorIdx])
+                markermsg.colors.append(colorList[colorIdx])
+
+                markermsg.points.append(d.p1.toPointMsg())
+                markermsg.points.append(d.p2.toPointMsg())
+                markermsg.colors.append(colorList[colorIdx])
+                markermsg.colors.append(colorList[colorIdx])
+                colorIdx = (colorIdx + 1) % len(colorList)
         self.pub_marker.publish(markermsg)
 
 
