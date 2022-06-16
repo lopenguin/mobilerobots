@@ -124,7 +124,10 @@ class SLAM():
             scan[i, 1] = yscan
 
         # convert to lines and draw in rviz
+        startTime = rospy.Time.now()
         scanLines_base = self.linesFromScan(scan)
+        print((rospy.Time.now() - startTime).to_sec())
+        return
         self.vizInst.drawInstantaneousWalls(scanLines_base, 'base')
 
 
